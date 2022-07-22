@@ -1,68 +1,68 @@
 const express = require('express');
-const User = express.Router();
-const userModel = require('../models/user');
-const CryptoJS = require('crypto-js');
-const jwt = require('jsonwebtoken');
+const User = require("../models/User");
+const auth = require('../middleware/auth');
+const router = express.Router();
 
-User.get('/', (req, res) => {
-  res.send('Get All Customers Data !!');
-});
 
-User.post('/register', async (req, res) => {
-  try {
-    const { password, ...otherData } = req.body;
-    const newUser = new userModel({
-      ...otherData,
-      password: CryptoJS.AES.encrypt(req.body.password, process.env.PASS_SEC).toString(),
-    });
-    console.log(newUser);
-    const savedUser = await newUser.save();
-    res.send(savedUser);
-  } catch (err) {
-    res.send(err);
+router.post('/register',async(req,res)=>{
+  const user = new User(req.body);
+  try{
+    await user.save();
+    const token = await user.generateAuthToken();
+    res.status(201).send({ user, token } );
+  }catch(e){
+    res.status(400).send(e);
   }
 });
 
-User.get('/', async (req, res) => {
-  try {
-    const users = await userModel.find({}); //to be populated if wanted
-    res.status(200).send(users);
-  } catch (err) {
-    res.status(400).send(err);
+router.post('/login', async (req,res)=>{
+  try{
+    const user = await User.findByCredentials(req.body.email,req.body.password);
+    const token = await user.generateAuthToken();
+    res.send({user, token});
+  } catch (e){
+    res.status(400).send(e.toString());
   }
 });
 
-// get user by id
-
-User.get('/:id', async (req, res) => {
-  try {
-    const users = await userModel.find({ _id: req.params.id }); //to be populated if wanted
-    res.status(200).send(users);
-  } catch (err) {
-    res.status(400).send(err);
-  }
-});
-
-// delete user by id
-
-User.delete('/:id', async (req, res) => {
-  try {
-    const result = await userModel.deleteOne({ _id: req.params.id });
-    res.status(200).send(result);
-  } catch (err) {
+router.post('/logout',auth, async (req,res)=>{
+  try{
+    req.user.tokens = req.user.tokens.filter( (token )=> token.token !== req.token);
+    await req.user.save();
     res.send();
+  }catch (e){
+    res.status(500).send();
   }
 });
 
-// update user by id 
+router.get('/',auth,async(req,res)=> {
+  res.send(req.user);
+});
 
-User.put('/:id', async (req, res) => {
+router.patch('/',auth,async (req,res)=>{
+  const updates = Object.keys(req.body);
+  const allowedUpdates = ['name','email','password'];
+  const isValidUpdate = updates.every(update => allowedUpdates.includes(update));
+
+  if(!isValidUpdate) return res.status(400).send({error:"Invalid updates!"});
   try {
-    const result = await userModel.updateOne({ _id: req.params.id }, req.body);
-    res.status(200).send(result);
-  } catch (err) {
-    res.status(200).send(err);
+    updates.forEach(update => req.user[update] = req.body[update]);
+    await req.user.save();
+    res.send(req.user);
+  }catch (e){
+    res.status(400).send(e);
+
   }
 });
 
-module.exports = User;
+router.delete('/',auth,async (req,res)=>{
+  try{
+    await req.user.remove();
+    res.send(req.user);
+  }catch (e){
+    res.status(400).send(e);
+  }
+});
+
+module.exports = router;
+
