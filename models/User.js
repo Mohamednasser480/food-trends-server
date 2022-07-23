@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-
+const Product = require('./product');
 
 const userSchema = new mongoose.Schema({
     name:{
@@ -13,9 +13,9 @@ const userSchema = new mongoose.Schema({
     email:{
         type: String,
         required:true,
+        unique: true,
         trim:true,
         lowercase:true,
-        unique:true,
         validate(value) {
             if(!validator.isEmail(value))throw new Error('Email is invalid');
         }
@@ -54,7 +54,11 @@ const userSchema = new mongoose.Schema({
         }
     }]
 })
-
+userSchema.virtual('Product',{
+   ref:'Product',
+   localField:'_id',
+    foreignField:'vendor'
+});
 userSchema.methods.generateAuthToken = async function(){
     const token = await jwt.sign({ _id: this._id.toString() }, process.env.JWT_SEC);
     this.tokens = this.tokens.concat({ token });
@@ -78,6 +82,11 @@ userSchema.statics.findByCredentials = async (email,password)=>{
 userSchema.pre('save',async function(next){
     if(this.isModified('password'))
         this.password = await bcrypt.hash(this.password,8) ;
+    next();
+});
+// Delete All Vendor Product
+userSchema.pre('remove',async function(next){
+    await Product.deleteMany({vendor: this._id});
     next();
 })
 const User = mongoose.model('User',userSchema)
