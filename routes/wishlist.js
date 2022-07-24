@@ -3,6 +3,11 @@ const Wishlist = express.Router();
 const WishlistModel = require('../models/Wishlist');
 const jwt = require('jsonwebtoken');
 
+
+// add item
+// remove item
+// get items
+
 Wishlist.get('/', (req, res) => {
     res.send('horaaaaaa');
   });
