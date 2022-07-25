@@ -3,13 +3,12 @@ const User = require("../models/User");
 const auth = require('../middleware/auth');
 const router = express.Router();
 
-
 router.post('/register',async(req,res)=>{
   const user = new User(req.body);
   try{
     await user.save();
     const token = await user.generateAuthToken();
-    res.status(201).send({ user, token } );
+    res.status(201).send({ user, token });
   }catch(e){
     res.status(400).send(e);
   }
@@ -51,7 +50,6 @@ router.patch('/',auth,async (req,res)=>{
     res.send(req.user);
   }catch (e){
     res.status(400).send(e);
-
   }
 });
 
