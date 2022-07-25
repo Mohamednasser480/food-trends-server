@@ -8,6 +8,8 @@ const orderRoute = require('./routes/order');
 const productRoute = require('./routes/product');
 const wishlistRoute = require("./routes/wishlist");
 const cartRoute = require('./routes/cart');
+const reviewRouter = require('./routes/review');
+
 
 const app = express();
 app.use(cors());
@@ -23,10 +25,11 @@ mongoose.connect(process.env.MONGO_URL)
 
 app.use('/api/v1/users', userRoute);
 app.use('/api/v1/orders', orderRoute);
-app.use('/api/v1/cart', cartRoute);
 app.use('/api/v1/products', productRoute);
-app.use('/api/v1/wishlist', wishlistRoute);
+app.use('/api/v1/reviews', reviewRouter);
 
+app.use('/api/v1/cart', cartRoute);
+app.use('/api/v1/wishlist', wishlistRoute);
 
 
 app.listen(process.env.PORT||3000,()=>{
