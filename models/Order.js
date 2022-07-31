@@ -29,8 +29,8 @@ const OrderSchema = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:'User',
         required: true
-    }
-});
+    },
+},{ timestamps: true });
 
 OrderSchema.post('save',async function(doc){
     // Update in stock instances of the ordered product
