@@ -63,7 +63,7 @@ userSchema.virtual('Product',{
     foreignField:'vendor'
 });
 userSchema.methods.generateAuthToken = async function(){
-    const token = await jwt.sign({ _id: this._id.toString() }, process.env.JWT_SEC);
+    const token = await jwt.sign({ _id: this._id.toString() }, process.env.JWT_SEC,{expiresIn: "3d"});
     this.tokens = this.tokens.concat({ token });
     await this.save();
     return token;
