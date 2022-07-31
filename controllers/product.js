@@ -50,10 +50,25 @@ const updateProduct = async (req,res)=>{
         res.status(400).send(e);
     }
 }
+
+const getMostSimilar = async (req,res)=>{
+    try{
+        const product = await productModel.findById(req.params.id);
+        if(!product) res.status(404).send();
+        const similarProducts = await productModel.find({category:product.category});
+        if(!similarProducts) res.status(404).send();
+        // points.sort(function(a, b){return b - a});
+        similarProducts.sort((a,b)=> (b.rate/b.numberOfReviews) - (a.rate/a.numberOfReviews));
+        res.send(similarProducts.slice(0,4));
+    }catch (e){
+        res.status(400).send(e);
+    }
+}
 module.exports = {
     getAllProducts,
     getProduct,
     addProduct,
     deleteProduct,
-    updateProduct
+    updateProduct,
+    getMostSimilar
 }
