@@ -17,7 +17,7 @@ const addReview = async (req,res)=>{
 // get all product reviews
 const getProductReviews = async(req,res)=>{
     try{
-        const productReview = await ReviewModel.find({product: req.params.id});
+        const productReview = await ReviewModel.find({product: req.params.id}).populate('customer');
         if(!productReview) return res.status(404).send(productReview);
         res.send(productReview);
     }catch (e){
