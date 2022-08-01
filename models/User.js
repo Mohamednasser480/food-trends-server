@@ -43,6 +43,9 @@ const userSchema = new mongoose.Schema({
     mobile:{
         type:String,
         required:true
+    },image:{
+        type:String,
+        default:'https://www.4read.net/uploads/authors/1534154564.png'
     },
     address:{
         type:String
@@ -60,7 +63,7 @@ userSchema.virtual('Product',{
     foreignField:'vendor'
 });
 userSchema.methods.generateAuthToken = async function(){
-    const token = await jwt.sign({ _id: this._id.toString() }, process.env.JWT_SEC);
+    const token = await jwt.sign({ _id: this._id.toString() }, process.env.JWT_SEC,{expiresIn: "3d"});
     this.tokens = this.tokens.concat({ token });
     await this.save();
     return token;
