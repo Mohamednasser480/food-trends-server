@@ -50,6 +50,9 @@ const userSchema = new mongoose.Schema({
     address:{
         type:String
     },
+    storeName:{
+        type:String
+    },
     tokens:[{
         token:{
             type:String,
@@ -57,6 +60,7 @@ const userSchema = new mongoose.Schema({
         }
     }]
 },{ timestamps: true });
+
 userSchema.virtual('Product',{
    ref:'Product',
    localField:'_id',
@@ -95,3 +99,6 @@ userSchema.pre('remove',async function(next){
 const User = mongoose.model('User',userSchema)
 
 module.exports = User;
+
+
+

@@ -6,11 +6,14 @@ const router = express.Router();
 router.post('/register',async(req,res)=>{
   const user = new User(req.body);
   try{
+    if(user.userType === 'vendor' && !user.storeName)
+      throw new Error('the store name is required !!');
+
     await user.save();
     const token = await user.generateAuthToken();
     res.status(201).send({ user, token });
   }catch(e){
-    res.status(400).send(e);
+    res.status(400).send(e.message);
   }
 });
 
