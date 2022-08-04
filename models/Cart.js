@@ -17,6 +17,10 @@ const Cart = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:'User',
         required: true
+    },cartPrice:{
+        required:true,
+        type:Number,
+        default:0
     }
 })
 

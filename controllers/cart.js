@@ -18,20 +18,21 @@ const addCartItem = async(req,res)=>{
 
         if(!customerCart) {
             if(req.body.quantity > product.inStock) return res.status(400).send('Out of stock');
-            customerCart =  new CartModel({products:[req.body],customer:req.user._id});
+            const price = req.body.quantity * product.price;
+            customerCart =  new CartModel({products:[req.body],customer:req.user._id,cartPrice:price});
             await customerCart.save();
             return res.status(201).send(customerCart);
         }
         const index = customerCart.products.findIndex( productObj => productObj.product.toString() === req.body.product);
         if(index === -1){
             if(req.quantity > product.inStock) return res.status(400).send('Out of stock');
-            customerCart.products.push({...req.body})
+            customerCart.products.push({...req.body});
         }
         else {
             if(customerCart.products[index].quantity + req.body.quantity > product.inStock) return res.status(400).send('Out of stock');
             customerCart.products[index].quantity+= req.body.quantity;
         }
-
+        customerCart.cartPrice += req.body.quantity * product.price;
 
         await customerCart.save();
         res.send(customerCart);
