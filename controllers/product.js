@@ -1,10 +1,19 @@
 const productModel = require("../models/product");
-
 const getAllProducts = async (req,res)=>{
     try{
-        const products = await productModel.find();
-        products.sort( (a,b) => b.rate - a.rate);
-        if(req.query.limit) return res.send(products.slice(0,req.query.limit));
+        const sort = {};
+        if(req.query.sortBy){
+            const partsOfSort = req.query.sortBy.split(':');
+            sort[partsOfSort[0]] = partsOfSort[1] === 'desc'?-1:1;
+        }
+        const options = {
+            limit:req.query.limit,
+            skip:req.query.skip,
+            sort:sort
+        }
+        const products = await productModel.find({},null,options);
+        // products.sort( (a,b) => b.rate - a.rate);
+        // if(req.query.limit) return res.send(products.slice(0,req.query.limit));
         res.send(products);
     }catch (err){
         res.status(400).send(err);
