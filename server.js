@@ -10,6 +10,7 @@ const productRoute = require("./routes/product");
 const wishlistRoute = require("./routes/wishlist");
 const cartRoute = require("./routes/cart");
 const reviewRouter = require("./routes/review");
+const vendorRouter = require("./routes/vendor");
 
 // Middlewares
 const app = express();
@@ -40,7 +41,7 @@ app.use(`${API_URI}/users`, userRoute);
 app.use(`${API_URI}/orders`, orderRoute);
 app.use(`${API_URI}/products`, productRoute);
 app.use(`${API_URI}/reviews`, reviewRouter);
-
+app.use(`${API_URI}/vendor`, vendorRouter);
 app.use(`${API_URI}/cart`, cartRoute);
 app.use(`${API_URI}/wishlist`, wishlistRoute);
 

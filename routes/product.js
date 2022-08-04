@@ -5,16 +5,12 @@ const productController = require('../controllers/product');
 const reviewController = require('../controllers/review');
 const Router = express.Router();
 
-// Get all vendor products
-Router.get('/',auth,productController.getAllProducts);
-// get vendor product by product id
-Router.get('/:id',auth,productController.getProduct);
-// add product
-Router.post('/',[auth, vendorAuth],productController.addProduct);
-// delete product
-Router.delete('/:id',[auth, vendorAuth] ,productController.deleteProduct);
-// update product
-Router.patch('/:id',[auth, vendorAuth],productController.updateProduct);
+// get all products sorted by the product rate
+// take limit as optional parameter
+Router.get('/',productController.getAllProducts);
+// get product by product id
+Router.get('/:id',productController.getProduct);
+
 // get product Review
 Router.get('/:id/reviews',reviewController.getProductReviews);
 
