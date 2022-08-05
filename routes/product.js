@@ -10,10 +10,7 @@ const Router = express.Router();
 Router.get('/',productController.getAllProducts);
 // get product by product id
 Router.get('/:id',productController.getProduct);
-
 // get product Review
 Router.get('/:id/reviews',reviewController.getProductReviews);
-
-Router.get('/mostSimilar/:id',productController.getMostSimilar);
 
 module.exports = Router;
