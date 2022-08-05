@@ -8,7 +8,6 @@ router.post('/register',async(req,res)=>{
   try{
     if(user.userType === 'vendor' && !user.storeName)
       throw new Error('the store name is required !!');
-
     await user.save();
     const token = await user.generateAuthToken();
     res.status(201).send({ user, token });
@@ -38,7 +37,7 @@ router.post('/logout',auth, async (req,res)=>{
 });
 
 router.get('/',auth,async(req,res)=> {
-  res.send(req.user);
+  res.send({user:req.user,token:req.token});
 });
 
 router.patch('/',auth,async (req,res)=>{
