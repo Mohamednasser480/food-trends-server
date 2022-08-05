@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 const ReviewSchema = mongoose.Schema({
-    comment:{
+    title:{
+        type:String,
+        required:true
+    },
+    body:{
         type:String,
         required:true
     },rating:{
