@@ -50,7 +50,7 @@ const getAllCartItems = async (req,res)=> {
 }
 const updateCart = async(req,res)=>{
     try{
-        const customerCart = await CartModel.findOne({customer:req.user._id});
+        const customerCart = await CartModel.findOne({customer:req.user._id}).populate('products.product');
         const cartProduct = customerCart.products.find( product => product._id.toString() === req.body.id);
         const product = await productModel.findById(cartProduct.product);
 
@@ -81,15 +81,15 @@ const deleteCartProduct = async (req,res)=>{
 const putCartProducts = async(req,res)=>{
     try{
         const customerCart = await CartModel.findOne({customer:req.user._id}).populate('products.product');
-        let  idOfProduct = '';
+        let  productName = '';
         // iterate over each product to put and check the stock instances
         const outOfStock = req.body.products.some( productToPut => {
             const product = customerCart.products.find((product)=> product.product._id.toString() === productToPut.product);
             // set the id of out of stock product
-            if(!idOfProduct && product.product.inStock < productToPut.quantity) idOfProduct = product.product._id;
+            if(!productName && product.product.inStock < productToPut.quantity) productName = product.product.productName;
             return product.product.inStock < productToPut.quantity;
         });
-        if(outOfStock) return res.status(400).send({message:'out of Stock', id:idOfProduct});
+        if(outOfStock) return res.status(400).send({message:'out of Stock', productName});
         await customerCart.remove();
         const newCart = new CartModel({products:req.body.products,cartPrice: req.body.cartPrice,customer:req.user._id,_id:customerCart._id});
         await newCart.save();
