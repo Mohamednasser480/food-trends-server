@@ -41,7 +41,7 @@ const addCartItem = async(req,res)=>{
 }
 const getAllCartItems = async (req,res)=> {
     try {
-        const cart = await CartModel.findOne({customer: req.user._id});
+        const cart = await CartModel.findOne({customer: req.user._id}).populate('products.product');
         if (!cart) return res.status(404).send({});
         res.send(cart);
     } catch (e) {
@@ -80,21 +80,24 @@ const deleteCartProduct = async (req,res)=>{
 }
 const putCartProducts = async(req,res)=>{
     try{
-        const customerCart = await CartModel.findOne({customer:req.user._id});
-        let  outOfStock = null;
-        for(let cartProduct of req.body.products)
-            if(!outOfStock){
-                const product = await productModel.findById(cartProduct.product);
-                console.log(cartProduct.quantity);
-                console.log(product.inStock);
-                if(cartProduct.quantity > product.inStock) outOfStock = cartProduct._id;
-            }
-        if(outOfStock) return res.status(400).send({message:'out of Stock', id:outOfStock});
-        customerCart.products = req.body.products;
-        customerCart.cartPrice = req.body.cartPrice;
-        await customerCart.save();
+        const customerCart = await CartModel.findOne({customer:req.user._id}).populate('products.product');
+        let  idOfProduct = '';
+        // iterate over each product to put and check the stock instances
+        const outOfStock = req.body.products.some( productToPut => {
+            const product = customerCart.products.find((product)=> product.product._id.toString() === productToPut.product);
+            // set the id of out of stock product
+            if(!idOfProduct && product.product.inStock < productToPut.quantity) idOfProduct = product.product._id;
+            return product.product.inStock < productToPut.quantity;
+        });
+        if(outOfStock) return res.status(400).send({message:'out of Stock', id:idOfProduct});
+        await customerCart.remove();
+        const newCart = new CartModel({products:req.body.products,cartPrice: req.body.cartPrice,customer:req.user._id,_id:customerCart._id});
+        await newCart.save();
+        // customerCart.products = req.body.products;
+        // customerCart.cartPrice = req.body.cartPrice;
         res.send(customerCart);
     }catch (e){
+        console.log(e);
         res.status(400).send(e.message);
     }
 }
