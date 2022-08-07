@@ -4,43 +4,45 @@ const productModel = require("../models/product");
 // Get all Customer Order
 const getAllOrders = async (req, res) => {
   try{
-    const customerOrders = await orderModel.find({customer:req.user._id});
+
+    let sort = {};
+    if(req.query.sortBy){
+      const partsOfSort = req.query.sortBy.split(':');
+      sort[partsOfSort[0]] = partsOfSort[1] === 'desc'?-1:1;
+    }
+    else sort = {"createdAt":-1};
+    const filterObj = {};
+    if(req.query.status)
+      filterObj.status = req.query.status;
+    filterObj.customer = req.user._id;
+
+    const customerOrders = await orderModel.find(filterObj,null,{sort}).populate('products.product');
     if(!customerOrders) return res.status(400).send();
     return res.send(customerOrders);
   }catch (e){
-    res.status(400).send('Error: ',e);
+    res.status(400).send(e.message);
   }
 }
-// Create Order by array of products items from cart collection
+// Create Order by array of product objects from cart collection
 const createOrder = async (req, res) => {
   try {
-    // function take the product ids in the cart collection that the customer want to Order them
-    // get the customer cart fields  if the Customer card is Empty throw error
-    const customerCart = await cartModel.findOne({customer:req.user._id});
-    if(!customerCart) return res.status(400).send('Error: Invalid Operation your cart is empty!!');
-    // if the order list is empty throw error
     let productsOrder = req.body.products;
     if(!productsOrder) return res.status(400).send('Error: Invalid Operation checkout list should not be empty!!');
-    // map the array productsOrder that contains the product ids to the array of cart object to get the quantity of each product
-      productsOrder = customerCart.products.filter( cartItem => {
-      const index = productsOrder.findIndex(productOrder => cartItem.product.toString() === productOrder);
-      return index !== -1;
-    });
-    // check the in stock Instances for each product
-    let validQuantities = true;
-    let totalPrice = 0;
-    for(let item of productsOrder){
-      const product = await productModel.findById(item.product);
-      validQuantities &= (product.inStock >= item.quantity);
-      totalPrice += item.quantity * product.price;
-    }
-    if(!validQuantities)return res.status(400).send('Invalid Order: out of stock');
 
-    const Order = new orderModel({products:productsOrder,customer:req.user._id,totalPrice});
+    // check the in stock Instances for each product
+    let outOfStockProduct;
+    productsOrder.forEach( item=>{
+      console.log(item);
+      if(!outOfStockProduct &&
+          item.product.inStock < item.quantity) outOfStockProduct = item.product.productName;
+    });
+    if(outOfStockProduct) return res.status(400).send({message:'out of Stock', productName:outOfStockProduct});
+    const orderObj = productsOrder.map(item =>  ({ product:item.product._id, quantity:item.quantity }));
+    const Order = new orderModel({products:orderObj,customer:req.user._id,totalPrice:req.body.totalPrice});
     await Order.save();
     // post save Order Update product in stock instances
     // post Save remove the order product from the cart
-    res.send(Order);
+    res.send(productsOrder);
   } catch (e) {
     res.status(400).send('Error: ' + e);
   }
