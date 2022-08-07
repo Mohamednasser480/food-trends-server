@@ -1,6 +1,4 @@
 const orderModel = require("../models/Order");
-const cartModel = require("../models/Cart");
-const productModel = require("../models/product");
 // Get all Customer Order
 const getAllOrders = async (req, res) => {
   try{

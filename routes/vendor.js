@@ -4,8 +4,11 @@ const vendorAuth = require('../middleware/vendorRole');
 const productController = require('../controllers/vendor');
 const Router = express.Router();
 
+// get all vendor orders
+Router.get('/orders/',[auth, vendorAuth],productController.getAllOrders);
 //get all vendor products
 Router.get('/:id',productController.getAllProducts);
+
 // add product
 Router.post('/',[auth, vendorAuth],productController.addProduct);
 // delete product
