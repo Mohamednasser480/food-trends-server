@@ -51,16 +51,15 @@ const getAllCartItems = async (req,res)=> {
 const updateCart = async(req,res)=>{
     try{
         const customerCart = await CartModel.findOne({customer:req.user._id}).populate('products.product');
-        const cartProduct = customerCart.products.find( product => product._id.toString() === req.body.id);
-        const product = await productModel.findById(cartProduct.product);
-
-        const validOpeation = req.body.quantity <= product.inStock;
-        if(!validOpeation) return res.status(400).send('Out of stock !!');
-        customerCart.cartPrice += (req.body.quantity - cartProduct.quantity) * product.price;
-        cartProduct.quantity = req.body.quantity;
-
+        const toUpdate = customerCart.products.find( product => product.product._id.toString() === req.body.id);
+        if(!toUpdate) return res.status(404).send('Product Not Found!!');
+        if(toUpdate.product.inStock < req.body.quantity)
+            return res.status(400).send({message:'out of Stock', productName:toUpdate.product.productName});
+        console.log(customerCart);
+        customerCart.cartPrice += (req.body.quantity - toUpdate.quantity) * toUpdate.product.price;
+        toUpdate.quantity = req.body.quantity;
         await customerCart.save();
-        res.send({cartProduct, cartPrice:customerCart.cartPrice});
+        res.send(customerCart);
     }catch (e){
         res.status(400).send('Error' + e);
     }
@@ -93,8 +92,6 @@ const putCartProducts = async(req,res)=>{
         await customerCart.remove();
         const newCart = new CartModel({products:req.body.products,cartPrice: req.body.cartPrice,customer:req.user._id,_id:customerCart._id});
         await newCart.save();
-        // customerCart.products = req.body.products;
-        // customerCart.cartPrice = req.body.cartPrice;
         res.send(customerCart);
     }catch (e){
         console.log(e);
