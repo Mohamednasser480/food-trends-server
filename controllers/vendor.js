@@ -1,5 +1,5 @@
 const productModel = require("../models/product");
-
+const orderModel = require('../models/Order');
 const addProduct = async (req,res)=>{
     try {
         const savedProduct = new productModel({...req.body,vendor:req.user._id});
@@ -42,10 +42,31 @@ const getAllProducts = async (req,res)=>{
         res.status(400).send('Error: '+e);
     }
 }
+const getAllOrders = async (req,res)=>{
+ try {
+     let sort = {};
+     if(req.query.sortBy){
+         const partsOfSort = req.query.sortBy.split(':');
+         sort[partsOfSort[0]] = partsOfSort[1] === 'desc'?-1:1;
+     }
+     else sort = {"createdAt":-1};
+     const filterObj = {};
+     if(req.query.status)
+         filterObj.status = req.query.status;
 
+     const vendorProducts = await productModel.find({vendor: req.user._id});
+     const allOrders = await orderModel.find({'products': {$elemMatch: {product:{$in:vendorProducts}}},...filterObj},
+                                         {'products.$' : 1,'totalPrice':1,'status':1},{sort}).populate('products.product');
+     if(!allOrders) return res.status(404).send();
+     res.send(allOrders);
+ }catch (e){
+     res.status(400).send(e.message);
+ }
+}
 module.exports = {
     addProduct,
     deleteProduct,
     updateProduct,
-    getAllProducts
+    getAllProducts,
+    getAllOrders
 }
