@@ -11,11 +11,23 @@ const getAllProducts = async (req,res)=>{
             skip:req.query.skip,
             sort:sort
         }
-        const products = await productModel.find({},null,options);
-        // products.sort( (a,b) => b.rate - a.rate);
-        // if(req.query.limit) return res.send(products.slice(0,req.query.limit));
+        const filterObj = {};
+        const maxPrice = req.query.max_price;
+        const minPrice = req.query.min_price;
+        if(maxPrice && minPrice) filterObj.price = { $lte:maxPrice,$gte:minPrice };
+        if(req.query.category){
+            req.query.category = req.query.category.toLowerCase();
+            filterObj.category = req.query.category;
+        }
+        if(req.query.search){
+            req.query.search = req.query.search.toLowerCase();
+            filterObj.productName = {"$regex": req.query.search};
+        }
+        const products = await productModel.find(filterObj,null,options);
+        if(!products) return res.status(404).send();
         res.send(products);
     }catch (err){
+        console.log(err);
         res.status(400).send(err);
     }
 }
