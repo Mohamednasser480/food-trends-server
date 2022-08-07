@@ -17,7 +17,18 @@ const addReview = async (req,res)=>{
 // get all product reviews
 const getProductReviews = async(req,res)=>{
     try{
-        const productReview = await ReviewModel.find({product: req.params.id}).populate('customer');
+        const filterObj = {};
+        const maxRate = req.query.max_rate;
+        const minRate = req.query.min_rate;
+        if(maxRate&&minRate) filterObj.rating = { $lte:maxRate,$gte:minRate }
+        filterObj.product = req.params.id;
+
+        if(req.query.search){
+            req.query.search = req.query.search.toLowerCase();
+            filterObj.comment = {"$regex": req.query.search};
+        }
+        console.log(filterObj);
+        const productReview = await ReviewModel.find(filterObj,null,{sort:{rating:-1}}).populate('customer');
         if(!productReview) return res.status(404).send(productReview);
         res.send(productReview);
     }catch (e){
