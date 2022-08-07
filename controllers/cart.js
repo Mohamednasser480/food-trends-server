@@ -91,9 +91,9 @@ const putCartProducts = async(req,res)=>{
             return product.product.inStock < productToPut.quantity;
         });
         if(outOfStock) return res.status(400).send({message:'out of Stock', productName});
-        await customerCart.remove();
-        const newCart = new CartModel({products:req.body.products,cartPrice: req.body.cartPrice,customer:req.user._id,_id:customerCart._id});
-        await newCart.save();
+        customerCart.products = req.body.products;
+        customerCart.cartPrice = req.body.cartPrice;
+        await customerCart.save();
         res.send(customerCart);
     }catch (e){
         console.log(e);
