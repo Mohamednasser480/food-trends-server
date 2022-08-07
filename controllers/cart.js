@@ -10,29 +10,29 @@ const addCartItem = async(req,res)=>{
         //     then iterate over the items
         //        if the item not added before in the product array in the cart collection add it
         //        if already added just change the quantity of this item
-        let customerCart = await CartModel.findOne({customer:req.user._id});
+        let customerCart = await CartModel.findOne({customer:req.user._id}).populate('products.product');
         // get the product to check number of in stock
         const product = await productModel.findById(req.body.product);
-
         if(!customerCart) {
-            if(req.body.quantity > product.inStock) return res.status(400).send('Out of stock');
+            if(req.body.quantity > product.inStock) return res.status(400).send({message:'out of Stock', productName:product.productName});
             const price = req.body.quantity * product.price;
             customerCart =  new CartModel({products:[req.body],customer:req.user._id,cartPrice:price});
             await customerCart.save();
+            customerCart.products[0].product = product; // populate product data, just one product in the cart collection
             return res.status(201).send(customerCart);
         }
+        // if the product is already in the customer cart
+        const productInCart = customerCart.products.find( cartItem=> cartItem.product._id.toString() === req.body.product);
+        if(!productInCart){
+            if(req.quantity > product.inStock) return res.status(400).send({message:'out of Stock', productName:product.productName});
+            customerCart.products.push({product,quantity:req.body.quantity});
+        }else{
+            if(req.body.quantity + productInCart.quantity > product.inStock)
+                return res.status(400).send({message:'out of Stock', productName:product.productName});
 
-        const index = customerCart.products.findIndex( productObj => productObj.product.toString() === req.body.product);
-        if(index === -1){
-            if(req.quantity > product.inStock) return res.status(400).send('Out of stock');
-            customerCart.products.push({...req.body});
-        }
-        else {
-            if(customerCart.products[index].quantity + req.body.quantity > product.inStock) return res.status(400).send('Out of stock');
-            customerCart.products[index].quantity+= req.body.quantity;
+            productInCart.quantity += req.body.quantity;
         }
         customerCart.cartPrice += req.body.quantity * product.price;
-
         await customerCart.save();
         res.send(customerCart);
     }catch (e){
@@ -66,13 +66,15 @@ const updateCart = async(req,res)=>{
 }
 const deleteCartProduct = async (req,res)=>{
     try{
-        const customerCart = await CartModel.findOne({customer:req.user._id});
-        const indexRemove = customerCart.products.findIndex( cartItem => cartItem._id.toString() === req.body.id);
-        const product = await productModel.findById(customerCart.products[indexRemove].product);
-        customerCart.cartPrice -= customerCart.products[indexRemove].quantity * product.price;
-        customerCart.products.splice(indexRemove,1);
+        const customerCart = await CartModel.findOne({customer:req.user._id}).populate('products.product');
+        const toDeleteIndex = customerCart.products.findIndex( cartItem => cartItem.product._id.toString()===req.body.id);
+        if(toDeleteIndex === -1) return res.status(404).send('product Not found');
+
+        const toDeleteProduct = customerCart.products[toDeleteIndex];
+        customerCart.cartPrice -= toDeleteProduct.quantity * toDeleteProduct.product.price;
+        customerCart.products.splice(toDeleteIndex,1);
         await customerCart.save();
-        res.send({id: req.body.id});
+        res.send(customerCart);
     }catch (e){
         res.status(400).send(e.message);
     }
