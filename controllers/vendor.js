@@ -56,7 +56,7 @@ const getAllOrders = async (req,res)=>{
 
      const vendorProducts = await productModel.find({vendor: req.user._id});
      const allOrders = await orderModel.find({'products': {$elemMatch: {product:{$in:vendorProducts}}},...filterObj},
-                                         {'products.$' : 1,'totalPrice':1,'status':1},{sort}).populate('products.product');
+                                         {'products.$' : 1,'totalPrice':1,'status':1,'customer':1,'createdAt':1},{sort}).populate('products.product').populate('customer');
      if(!allOrders) return res.status(404).send();
      res.send(allOrders);
  }catch (e){
