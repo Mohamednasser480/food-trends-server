@@ -1,6 +1,7 @@
 const express = require('express');
 const User = require("../models/User");
 const auth = require('../middleware/auth');
+const {confirmationMail} = require('../emails/account');
 const router = express.Router();
 
 router.post('/register',async(req,res)=>{
@@ -8,9 +9,9 @@ router.post('/register',async(req,res)=>{
   try{
     if(user.userType === 'vendor' && !user.storeName)
       throw new Error('the store name is required !!');
+    user.confirmationCode = confirmationMail(user.email);
     await user.save();
-    const token = await user.generateAuthToken();
-    res.status(201).send({ user, token });
+    res.status(201).send();
   }catch(e){
     res.status(400).send(e.message);
   }
@@ -25,6 +26,18 @@ router.post('/login', async (req,res)=>{
     res.status(400).send(e.toString());
   }
 });
+
+router.post('/confirm',auth,async (req,res)=>{
+  try{
+    if(req.body.confirmationCode === req.user.confirmationCode)
+      req.user.status = 'Active';
+    else return res.status(400).send({msg:'wrong confirmation code'});
+    await req.user.save();
+    res.send(req.user);
+  }catch (e){
+    res.status(400).send(e.message)
+  }
+})
 
 router.post('/logout',auth, async (req,res)=>{
   try{
