@@ -10,6 +10,7 @@ const ProductSchema = new mongoose.Schema({
             required:true
         }
     ],
+    weight:{type:Number},
     category:{ type: String, required:true },
     price:{ type:Number, required:true },
     inStock:{ type:Number, required:true },
