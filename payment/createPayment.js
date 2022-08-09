@@ -14,7 +14,7 @@ const createPayment = async (orderData)=>{
                     price_data:{
                         currency:'EGP' ,
                         product_data:{name:item.product.productName, images:item.product.images},
-                        unit_amount:item.product.price.toFixed(0)*100,
+                        unit_amount:item.product.price*100,
 
                     },
                     quantity: item.quantity
