@@ -1,12 +1,19 @@
- const sgMail = require('@sendgrid/mail');
-const sendgridAPIKey = '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';
+const dotenv = require("dotenv");
+const sgMail = require('@sendgrid/mail');
+dotenv.config();
+const sendgridAPIKey = process.env.SENDGRID_API_KEY;
 sgMail.setApiKey(sendgridAPIKey);
 
-sgMail.send({
-    to:'mnasser480@gmail.com',
-    from:'mnasser480@gmail.com',
-    template_id: "d-3ee3fcd8cbbe4f75a5b34fda95c0413c",
-    dynamic_template_data: {
-        code: "12d874"
-    }
-});
+
+const confirmationMail = (to)=>{
+    const code = Math.floor(Math.random()*90000) + 10000;
+    sgMail.send({
+        to: to, // Change to your recipient
+        from: 'foodtrendsfamily@gmail.com', // Change to your verified sender
+        subject: 'confirmation mail',
+        text: 'and easy to do anywhere, even with Node.js',
+        html: `<strong>your conformation code is : ${code}</strong>`
+    });
+    return code;
+}
+module.exports = {confirmationMail}

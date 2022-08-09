@@ -47,6 +47,15 @@ const userSchema = new mongoose.Schema({
         type:String,
         default:'https://www.4read.net/uploads/authors/1534154564.png'
     },
+    status: {
+        type: String,
+        enum: ['Pending', 'Active'],
+        default: 'Pending'
+    },
+    confirmationCode: {
+        type: String,
+        unique: true
+    },
     address:{
         type:String
     },
@@ -76,6 +85,7 @@ userSchema.methods.toJSON = function (){
     const userObject = this.toObject();
     delete userObject.password;
     delete userObject.tokens;
+    delete userObject.confirmationCode;
     return userObject;
 }
 userSchema.statics.findByCredentials = async (email,password)=>{
@@ -83,6 +93,7 @@ userSchema.statics.findByCredentials = async (email,password)=>{
     if(!user) throw new Error('Unable to login');
     const isMatch = await bcrypt.compare(password, user.password);
     if(!isMatch) throw new Error('Unable to login');
+    if(user.status === 'Pending') throw new Error('Pending Account. Please Verify Your Email!!');
     return user;
 }
 // Hash the plain text password before saving
