@@ -2,6 +2,7 @@ const express = require('express');
 const User = require("../models/User");
 const auth = require('../middleware/auth');
 const {confirmationMail} = require('../emails/account');
+const {contactUsMail} = require('../emails/contact');
 const router = express.Router();
 
 router.post('/register',async(req,res)=>{
@@ -76,6 +77,13 @@ router.delete('/',auth,async (req,res)=>{
     res.status(400).send(e);
   }
 });
-
+router.post('/contact',auth,async (req,res)=>{
+  try{
+    await contactUsMail(req.body.email,req.body.message,req.body.name);
+    res.send();
+  }catch (e){
+    res.status(400).send(e)
+  }
+})
 module.exports = router;
 
