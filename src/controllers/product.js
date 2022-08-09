@@ -21,7 +21,7 @@ const getAllProducts = async (req,res)=>{
         }
         if(req.query.search){
             req.query.search = req.query.search.toLowerCase();
-            filterObj.productName = {"$regex": req.query.search};
+            filterObj.productName = {"$regex": req.query.search,'$options':'i'};
         }
         const products = await productModel.find(filterObj,null,options);
         if(!products) return res.status(404).send();
