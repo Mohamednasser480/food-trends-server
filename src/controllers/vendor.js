@@ -20,7 +20,7 @@ const deleteProduct = async (req,res)=>{
 }
 const updateProduct = async (req,res)=>{
     const updates = Object.keys(req.body);
-    const allowedUpdates = ['name', 'summary','description','images','category','price','inStock','discount'];
+    const allowedUpdates = ['name', 'summary','description','images','category','price','inStock','discount','weight'];
     const isValidUpdate = updates.every( update => allowedUpdates.includes(update));
     if(!isValidUpdate) return res.status(400).send({error:'Invalid update!'});
     try{
