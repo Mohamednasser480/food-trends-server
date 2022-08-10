@@ -31,7 +31,7 @@ const deleteProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
   const updates = Object.keys(req.body);
   const allowedUpdates = [
-    "name",
+    "productName",
     "summary",
     "description",
     "images",
