@@ -25,12 +25,17 @@ const getProductReviews = async(req,res)=>{
 
         if(req.query.search){
             req.query.search = req.query.search.toLowerCase();
-            filterObj.comment = {"$regex": req.query.search};
+            filterObj.comment = {"$regex":  req.query.search,'$options':'i'}
         }
-        console.log(filterObj);
-        const productReview = await ReviewModel.find(filterObj,null,{sort:{rating:-1}}).populate('customer');
+        const options = {
+            sort:{rating:-1},
+            limit: req.query.limit,
+            skip: req.query.skip
+        }
+        const count = await ReviewModel.find(filterObj).count();
+        const productReview = await ReviewModel.find(filterObj,null,options).populate('customer');
         if(!productReview) return res.status(404).send(productReview);
-        res.send(productReview);
+        res.send({data: productReview,count} );
     }catch (e){
         res.status(400).send('Error '+e);
     }
@@ -55,7 +60,7 @@ const deleteProductReview = async(req,res)=>{
 const updateProductReview = async (req,res)=>{
     try{
         const updates = Object.keys(req.body);
-        const allowedUpdates = ['rating','comment'];
+        const allowedUpdates = ['rating','comment','title'];
         const isValidUpdate = updates.every(update => allowedUpdates.includes(update));
 
         if(!isValidUpdate) return res.status(400).send({error:"Invalid updates!"});
