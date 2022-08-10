@@ -34,7 +34,8 @@ const getProductReviews = async(req,res)=>{
         }
         const count = await ReviewModel.find(filterObj).count();
         const productReview = await ReviewModel.find(filterObj,null,options).populate('customer');
-        if(!productReview) return res.status(404).send(productReview);
+        if(!productReview) return res.status(404).send('Review Not Found !!');
+
         res.send({data: productReview,count} );
     }catch (e){
         res.status(400).send('Error '+e);

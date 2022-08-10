@@ -25,18 +25,17 @@ const getAllProducts = async (req,res)=>{
         }
         const count = await productModel.find(filterObj,null).count();
         const products = await productModel.find(filterObj,null,options);
-        if(!products) return res.status(404).send();
+        if(!products) return res.status(404).send('Products Not Found !!');
 
         res.send({data:products,count});
     }catch (err){
-        console.log(err);
         res.status(400).send(err);
     }
 }
 const getProduct = async (req,res)=>{
     try{
         const product = await productModel.findOne({_id:req.params.id});
-        if(!product) return res.status(404).send();
+        if(!product) return res.status(404).send('Product Not Found');
         res.status(200).send(product);
     }catch (err){
         res.status(400).send(err);
