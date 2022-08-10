@@ -15,10 +15,11 @@ const getAllOrders = async (req, res) => {
     if(req.query.status)
       filterObj.status = req.query.status;
     filterObj.customer = req.user._id;
+    const count = await  orderModel.find(filterObj).count();
 
     const customerOrders = await orderModel.find(filterObj,null,{sort}).populate('products.product');
     if(!customerOrders) return res.status(400).send();
-    return res.send(customerOrders);
+    return res.send({data:customerOrders,count});
   }catch (e){
     res.status(400).send(e.message);
   }
