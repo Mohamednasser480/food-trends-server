@@ -11,7 +11,7 @@ const wishlistRoute = require("./routes/wishlist");
 const cartRoute = require("./routes/cart");
 const reviewRouter = require("./routes/review");
 const vendorRouter = require("./routes/vendor");
-
+const deliveryRouter = require('./routes/delivery');
 // Middlewares
 const app = express();
 app.use(cors());
@@ -44,6 +44,7 @@ app.use(`${API_URI}/reviews`, reviewRouter);
 app.use(`${API_URI}/vendor`, vendorRouter);
 app.use(`${API_URI}/cart`, cartRoute);
 app.use(`${API_URI}/wishlist`, wishlistRoute);
+app.use(`${API_URI}/delivery`, deliveryRouter);
 
 app.listen(app.get("port"), () => {
   console.log(`Backend server is running on http://${HOST}:${app.get("port")}`);

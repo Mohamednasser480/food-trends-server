@@ -59,8 +59,16 @@ const userSchema = new mongoose.Schema({
         unique: true
     },
     address:{
-        type:String,
-        lowercase: true
+        city:{
+            type:String,
+            required:true,
+            lowercase: true
+        },
+        government:{
+            type:String,
+            required:true,
+            lowercase: true
+        }
     },
     storeName:{
         type:String,
