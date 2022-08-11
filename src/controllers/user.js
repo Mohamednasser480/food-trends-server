@@ -75,7 +75,7 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
     try {
         await req.user.remove();
-        res.send(req.user);
+        res.send();
     } catch (e) {
         res.status(400).send(e);
     }

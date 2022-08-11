@@ -3,7 +3,8 @@ const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Product = require('./product');
-
+const wishlistModel = require('../models/Wishlist');
+const cartModel = require('../models/Cart');
 const userSchema = new mongoose.Schema({
     name:{
         type: String,
@@ -105,11 +106,17 @@ userSchema.pre('save',async function(next){
         this.password = await bcrypt.hash(this.password,8) ;
     next();
 });
-// Delete All Vendor Product
+
+
 userSchema.pre('remove',async function(next){
-    await Product.deleteMany({vendor: this._id});
+    // Delete user wishlist
+    await wishlistModel.deleteOne({customer: this._id});
+    // Delete user cart
+    await cartModel.deleteOne({customer: this._id});
+    // If the User was Vendor then should delete all his products
     next();
 })
+
 const User = mongoose.model('User',userSchema)
 
 module.exports = User;
