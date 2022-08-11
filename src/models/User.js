@@ -96,7 +96,6 @@ userSchema.statics.findByCredentials = async (email,password)=>{
     if(!user) throw new Error('Unable to login');
     const isMatch = await bcrypt.compare(password, user.password);
     if(!isMatch) throw new Error('Unable to login');
-    // if(user.status === 'Pending') throw new Error('Pending Account. Please Verify Your Email!!');
     return user;
 }
 // Hash the plain text password before saving

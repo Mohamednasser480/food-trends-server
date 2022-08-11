@@ -20,12 +20,7 @@ const login = async (req, res) => {
             req.body.password
         );
         const token = await user.generateAuthToken();
-        if (user.status === "Active") {
-            res.send({user, token});
-        }else{
-            res.send({user, token});
-            // throw new Error('Pending Account. Please Verify Your Email!!')
-        }
+        res.send({user, token});
     } catch (e) {
         res.status(400).send(e.toString());
     }
