@@ -43,13 +43,8 @@ OrderSchema.post('save',async function(doc){
     });
     // remove ordered product from the customer cart
     const customerCart = await cartModel.findOne({customer:doc.customer});
-    const newCart = customerCart.products.filter( cart => {
-        const index = doc.products.findIndex( orderObj => {
-            return orderObj.product.toString() === cart.product.toString()
-        } );
-        return index === -1;
-    });
-    customerCart.products = newCart;
+    customerCart.products = [];
+    customerCart.cartPrice = 0;
     customerCart.save();
 });
 

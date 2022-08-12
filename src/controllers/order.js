@@ -1,6 +1,6 @@
 const {createPayment} = require('../payment/createPayment');
 const orderModel = require("../models/Order");
-
+const cartModel = require("../models/Cart");
 // Get all Customer Order
 const getAllOrders = async (req, res) => {
   try{
@@ -27,9 +27,9 @@ const getAllOrders = async (req, res) => {
 // Create Order by array of product objects from cart collection
 const createOrder = async (req, res) => {
   try {
-    let productsOrder = req.body.products;
-    if(!productsOrder) return res.status(400).send('Error: Invalid Operation checkout list should not be empty!!');
-
+    const customerCart = await cartModel.findOne({customer:req.user._id}).populate('products.product');
+    if(!customerCart) return res.status(400).send('Error: Invalid Operation checkout list should not be empty!!');
+    const productsOrder = customerCart.products;
     // check the in stock Instances for each product
     let outOfStockProduct;
     productsOrder.forEach( item=>{
@@ -37,24 +37,26 @@ const createOrder = async (req, res) => {
           item.product.inStock < item.quantity) outOfStockProduct = item.product.productName;
     });
     if(outOfStockProduct) return res.status(400).send({message:'out of Stock', productName:outOfStockProduct});
-    const orderObj = productsOrder.map(item =>  ({ product:item.product._id, quantity:item.quantity }));
-
-
-    const makeOrderRes = await createPayment(req.body.products);
+    const makeOrderRes = await createPayment(productsOrder);
     if(makeOrderRes.error) throw new Error(makeOrderRes.error);
-
-
-    const Order = new orderModel({products:orderObj,customer:req.user._id,totalPrice:req.body.totalPrice});
-    await Order.save();
-    // post save Order Update product in stock instances
-    // post Save remove the order product from the cart
-    // res.send(productsOrder);
-
     res.send(makeOrderRes);
   } catch (e) {
-    console.log(e);
     res.status(400).send('Error: ' + e);
   }
+}
+const saveOrder = async (req,res)=>{
+  try {
+    const customerCart = await cartModel.findOne({customer: req.user._id}).populate('products.product');
+    const orderObj = productsOrder.map(item => ({product: item.product._id, quantity: item.quantity}));
+    const Order = new orderModel({products: orderObj, customer: req.user._id, totalPrice: customerCart.cartPrice});
+    await Order.save();
+    res.send();
+  }catch(e){
+    res.status(400).send(e.message);
+  }
+  // post save Order Update product in stock instances
+  // post Save remove the order product from the cart
+  // res.send(productsOrder);
 }
 // Cancel the Order if the status is Pending
 const cancelOrder = async (req,res)=>{
@@ -75,4 +77,5 @@ module.exports = {
   getAllOrders,
   createOrder,
   cancelOrder,
+  saveOrder
 }

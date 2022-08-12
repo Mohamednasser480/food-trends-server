@@ -13,13 +13,12 @@ const createPayment = async (orderData)=>{
                 return {
                     price_data:{
                         currency:'EGP' ,
-                        product_data:{name:item.product.productName, images:item.product.images},
+                        product_data:{name:item.product.productName},
                         unit_amount:item.product.price*100,
-
                     },
                     quantity: item.quantity
                 }
-            }),
+            })
         }
         const session = await stripe.checkout.sessions.create(config);
         return {url:session.url}
