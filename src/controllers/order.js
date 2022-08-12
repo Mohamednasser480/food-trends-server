@@ -47,6 +47,7 @@ const createOrder = async (req, res) => {
 const saveOrder = async (req,res)=>{
   try {
     const customerCart = await cartModel.findOne({customer: req.user._id}).populate('products.product');
+    const productsOrder=customerCart.products;
     const orderObj = productsOrder.map(item => ({product: item.product._id, quantity: item.quantity}));
     const Order = new orderModel({products: orderObj, customer: req.user._id, totalPrice: customerCart.cartPrice});
     await Order.save();
