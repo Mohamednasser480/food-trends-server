@@ -31,6 +31,10 @@ const OrderSchema = new mongoose.Schema({
         ref:'User',
         required: true
     },
+    delivery:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'User'
+    },
 },{ timestamps: true });
 
 OrderSchema.post('save',async function(doc){
