@@ -15,7 +15,8 @@ const addProduct = async (req, res) => {
     await savedProduct.save();
     res.status(201).send(savedProduct);
   } catch (err) {
-    res.status(400).send(err);
+    console.log(err);
+    res.status(400).send(err.message);
   }
 };
 

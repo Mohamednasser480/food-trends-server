@@ -45,7 +45,8 @@ const userSchema = new mongoose.Schema({
     mobile:{
         type:String,
         required:true
-    },image:{
+    },
+    image:{
         type:String,
         default:'https://www.4read.net/uploads/authors/1534154564.png'
     },

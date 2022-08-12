@@ -37,7 +37,7 @@ const createOrder = async (req, res) => {
           item.product.inStock < item.quantity) outOfStockProduct = item.product.productName;
     });
     if(outOfStockProduct) return res.status(400).send({message:'out of Stock', productName:outOfStockProduct});
-    const makeOrderRes = await createPayment(productsOrder);
+    const makeOrderRes = await createPayment(productsOrder,req.body.url);
     if(makeOrderRes.error) throw new Error(makeOrderRes.error);
     res.send(makeOrderRes);
   } catch (e) {
