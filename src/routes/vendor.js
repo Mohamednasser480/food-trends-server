@@ -26,7 +26,7 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const upload = multer({ storage: fileStorage });
+const upload = multer({ storage: fileStorage, fileFilter: fileFilter });
 
 // get all vendor orders
 Router.get("/orders/", [auth, vendorAuth], productController.getAllOrders);
@@ -42,6 +42,10 @@ Router.post(
 // delete product
 Router.delete("/:id", [auth, vendorAuth], productController.deleteProduct);
 // update product
-Router.patch("/:id", [auth, vendorAuth], productController.updateProduct);
+Router.patch(
+  "/:id",
+  [auth, vendorAuth, upload.array("images", 4)],
+  productController.updateProduct
+);
 
 module.exports = Router;
