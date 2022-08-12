@@ -64,7 +64,7 @@ const userSchema = new mongoose.Schema({
             required:true,
             lowercase: true
         },
-        government:{
+        governorate:{
             type:String,
             required:true,
             lowercase: true
