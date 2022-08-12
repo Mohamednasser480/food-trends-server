@@ -9,5 +9,5 @@ Order.get('/',auth, orderController.getAllOrders);
 Order.post('/', auth, orderController.createOrder);
 // Cancel Order
 Order.delete('/:id',auth,orderController.cancelOrder);
-
+Order.post('/save',auth,orderController.saveOrder);
 module.exports = Order;
