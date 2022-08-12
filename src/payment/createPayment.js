@@ -6,7 +6,7 @@ const createPayment = async (orderData,url)=>{
     try{
         const config = {
             success_url: `${url}?success=true`,
-            cancel_url: `${url}?cancel=true`,
+            cancel_url: `${url}?success=false`,
             payment_method_types : ['card'],
             mode:'payment',
             line_items:orderData.map( item=>{
