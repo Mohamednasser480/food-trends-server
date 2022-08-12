@@ -1,5 +1,7 @@
 const productModel = require("../models/product");
 const orderModel = require("../models/Order");
+
+// Add a Product
 const addProduct = async (req, res) => {
   try {
     const images = req.files.map((file) => {
@@ -16,6 +18,8 @@ const addProduct = async (req, res) => {
     res.status(400).send(err);
   }
 };
+
+// Delete a Product
 const deleteProduct = async (req, res) => {
   try {
     const product = await productModel.findOneAndDelete({
@@ -28,24 +32,35 @@ const deleteProduct = async (req, res) => {
     res.status(400).send(e);
   }
 };
+
+// Update a Product
 const updateProduct = async (req, res) => {
+  const images = req.files.map((file) => {
+    return file.path;
+  });
   const updates = Object.keys(req.body);
+  updates.push(req.files[0].fieldname);
   const allowedUpdates = [
     "productName",
     "summary",
     "description",
-    "images",
     "category",
+    "images",
     "price",
     "inStock",
     "discount",
     "weight",
   ];
-  const isValidUpdate = updates.every((update) =>
-    allowedUpdates.includes(update)
-  );
+
+  const isValidUpdate = updates.every((update) => {
+    if (allowedUpdates.includes(update)) return true;
+    return false;
+  });
   if (!isValidUpdate) return res.status(400).send({ error: "Invalid update!" });
   try {
+    // Add images to the body
+    req.body["images"] = images;
+
     const updatedProduct = await productModel.findOneAndUpdate(
       { _id: req.params.id, vendor: req.user._id },
       req.body,
@@ -59,6 +74,8 @@ const updateProduct = async (req, res) => {
     res.status(400).send(e);
   }
 };
+
+// Get All Products
 const getAllProducts = async (req, res) => {
   try {
     const products = await productModel.find({ vendor: req.params.id });
@@ -68,6 +85,8 @@ const getAllProducts = async (req, res) => {
     res.status(400).send("Error: " + e);
   }
 };
+
+// Get All Orders that are ordered by customers
 const getAllOrders = async (req, res) => {
   try {
     let sort = {};
