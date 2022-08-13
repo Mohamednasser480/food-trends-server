@@ -8,6 +8,7 @@ const Router = express.Router();
 // get all products sorted by the product rate
 // take limit as optional parameter
 Router.get('/',productController.getAllProducts);
+Router.get('/categories',productController.getCategories);
 // get product by product id
 Router.get('/:id',productController.getProduct);
 // get product Review
