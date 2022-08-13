@@ -5,12 +5,12 @@ const register = async (req, res) => {
     const user = new User(req.body);
     try {
         if (user.userType === "vendor" && !user.storeName)
-            throw new Error("store name is required");
+            throw new Error("the store name is required !!");
         user.confirmationCode = confirmationMail(user.email);
         await user.save();
         res.status(201).send();
     } catch (e) {
-        res.status(400).send({error:e.message,code:400});
+        res.status(400).send(e.message);
     }
 }
 const login = async (req, res) => {
@@ -22,18 +22,18 @@ const login = async (req, res) => {
         const token = await user.generateAuthToken();
         res.send({user, token});
     } catch (e) {
-        res.status(400).send({error:e.message,code:400});
+        res.status(400).send(e.toString());
     }
 }
 const confirm =  async (req, res) => {
     try {
         if (req.body.confirmationCode === req.user.confirmationCode)
             req.user.status = "Active";
-        else return res.status(400).send({error: "wrong confirmation code",code:400});
+        else return res.status(400).send({ msg: "wrong confirmation code" });
         await req.user.save();
         res.send(req.user);
     } catch (e) {
-        res.status(400).send({error:e.message,code:400});
+        res.status(400).send(e.message);
     }
 }
 const logout = async (req, res) => {
@@ -44,7 +44,7 @@ const logout = async (req, res) => {
         await req.user.save();
         res.send();
     } catch (e) {
-        res.status(400).send({error:e.message,code:400});
+        res.status(400).send();
     }
 }
 const userProfile = async (req, res) => {
