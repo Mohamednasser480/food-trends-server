@@ -11,6 +11,8 @@ const getAllOrders = async (req,res)=>{
         let orders = await orderModel.find(filterObj,null,options).populate('products.product').populate('customer');
         const city = (req.query.city)? req.query.city.toLowerCase() : '';
         const gov = (req.query.gov)? req.query.gov.toLowerCase() : '';
+        // orders = orders.filter(order => order.customer !== null);
+        return res.send(orders);
         orders = orders.filter(order => order.customer.address.city.includes(city)  && order.customer.address.governorate.includes(gov));
         if(!orders) res.status(404).send({error:'Orders Not Found',code:404});
         res.send({data:orders,count});
@@ -24,6 +26,11 @@ const assignOrder = async (req,res)=>{
         if(!order) return res.status(404).send({error:'Order not found',code:404});
         order.delivery = req.user._id;
         order.status = 'assigned';
+
+        const dt = new Date();
+        dt.setDate(dt.getDate() + 1)
+        order.expectedDeliveryDate = `${dt.getFullYear()}-${dt.getMonth()+1}-${dt.getDate()}`;
+
         await order.save();
         res.send(order);
     }catch (e){
@@ -50,8 +57,10 @@ const updateOrderStatus = async(req,res)=>{
 
         order.status = req.body.status;
 
-        if(req.body.status === "pending")
+        if(req.body.status === "pending") {
             order.delivery = null;
+            order.expectedDeliveryDate = null;
+        }
 
         await order.save();
         res.send(order);

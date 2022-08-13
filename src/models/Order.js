@@ -31,6 +31,9 @@ const OrderSchema = new mongoose.Schema({
         ref:'User',
         required: true
     },
+    expectedDeliveryDate:{
+      type:String,
+    },
     delivery:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'User'
