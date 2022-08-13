@@ -15,7 +15,7 @@ const addProduct = async (req, res) => {
     await savedProduct.save();
     res.status(201).send(savedProduct);
   } catch (e) {
-    res.status(400).send({error:e.message,code:400});
+    res.status(400).send({ error: e.message, code: 400 });
   }
 };
 
@@ -26,10 +26,11 @@ const deleteProduct = async (req, res) => {
       _id: req.params.id,
       vendor: req.user._id,
     });
-    if (!product) return res.status(404).send({error:'product not found',code:404});
+    if (!product)
+      return res.status(404).send({ error: "product not found", code: 404 });
     res.send(product);
   } catch (e) {
-    res.status(400).send({error:e.message,code:400});
+    res.status(400).send({ error: e.message, code: 400 });
   }
 };
 // Update a Product
@@ -38,7 +39,7 @@ const updateProduct = async (req, res) => {
     return file.path;
   });
   const updates = Object.keys(req.body);
-  updates.push(req.files[0].fieldname);
+  updates.push("images");
   const allowedUpdates = [
     "productName",
     "summary",
@@ -55,8 +56,12 @@ const updateProduct = async (req, res) => {
     if (allowedUpdates.includes(update)) return true;
     return false;
   });
-  if (!isValidUpdate) return res.status(400).send({ error: "Invalid updates",code:400});
+  if (!isValidUpdate)
+    return res.status(400).send({ error: "Invalid updates", code: 400 });
   try {
+    if (!images.length) {
+      return res.status(422).send({ error: "No Images Found", code: 422 });
+    }
     // Add images to the body
     req.body["images"] = images;
 
@@ -65,22 +70,24 @@ const updateProduct = async (req, res) => {
       req.body,
       { new: true, runValidators: true }
     );
-    if (!updatedProduct) return res.status(404).send({error:'product not found',code:404});
+    if (!updatedProduct)
+      return res.status(404).send({ error: "product not found", code: 404 });
     updates.forEach((update) => (updatedProduct[update] = req.body[update]));
     await updatedProduct.save();
     res.send(updatedProduct);
   } catch (e) {
-    res.status(400).send({error:e.message,code:400});
+    res.status(400).send({ error: e.message, code: 400 });
   }
 };
 // Get All Products
 const getAllProducts = async (req, res) => {
   try {
     const products = await productModel.find({ vendor: req.params.id });
-    if (!products) res.status(404).send({error:'product not found',code:400});
+    if (!products)
+      res.status(404).send({ error: "product not found", code: 400 });
     res.send(products);
   } catch (e) {
-    res.status(400).send({error:e.message,code:400});
+    res.status(400).send({ error: e.message, code: 400 });
   }
 };
 // Get All Orders that are ordered by customers
@@ -112,10 +119,11 @@ const getAllOrders = async (req, res) => {
       )
       .populate("products.product")
       .populate("customer");
-    if (!allOrders) return res.status(404).send({error:'orders not found',code:404});
+    if (!allOrders)
+      return res.status(404).send({ error: "orders not found", code: 404 });
     res.send(allOrders);
   } catch (e) {
-    res.status(400).send({error:e.message,code:400});
+    res.status(400).send({ error: e.message, code: 400 });
   }
 };
 module.exports = {
