@@ -12,7 +12,6 @@ const getAllOrders = async (req,res)=>{
         const city = (req.query.city)? req.query.city.toLowerCase() : '';
         const gov = (req.query.gov)? req.query.gov.toLowerCase() : '';
         // orders = orders.filter(order => order.customer !== null);
-        return res.send(orders);
         orders = orders.filter(order => order.customer.address.city.includes(city)  && order.customer.address.governorate.includes(gov));
         if(!orders) res.status(404).send({error:'Orders Not Found',code:404});
         res.send({data:orders,count});
