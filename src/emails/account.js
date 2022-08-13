@@ -9,9 +9,9 @@ const confirmationMail = (to)=>{
     const code = Math.floor(Math.random()*90000) + 10000;
     sgMail.send({
         to: to, // Change to your recipient
-        from: 'foodtrendsfamily@gmail.com', // Change to your verified sender
-        subject: 'confirmation mail',
-        text: 'and easy to do anywhere, even with Node.js',
+        from: 'foodtrendswebsite@gmail.com', // Change to your verified sender
+        subject: 'FoodTrends - Confirmation Code',
+        text: 'Thanks!',
         html: `<strong>your conformation code is : ${code}</strong>`
     });
     return code;
