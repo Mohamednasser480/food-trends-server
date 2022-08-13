@@ -11,7 +11,7 @@ const addReview = async (req,res)=>{
         await review.save();
         res.status(201).send(review);
     } catch (e){
-        res.status(400).send('Error: '+e);
+        res.status(400).send({error:e.message,code:400});
     }
 }
 // get all product reviews
@@ -34,18 +34,18 @@ const getProductReviews = async(req,res)=>{
         }
         const count = await ReviewModel.find(filterObj).count();
         const productReview = await ReviewModel.find(filterObj,null,options).populate('customer');
-        if(!productReview) return res.status(404).send('Review Not Found !!');
+        if(!productReview) return res.status(404).send({error:'Review not found',code:404});
 
         res.send({data: productReview,count} );
     }catch (e){
-        res.status(400).send('Error '+e);
+        res.status(400).send({error:e.message,code:400});
     }
 }
 // delete product Review
 const deleteProductReview = async(req,res)=>{
     try{
         const review = await ReviewModel.findOne({customer:req.user._id, _id:req.params.id});
-        if(!review) return res.status(404).send();
+        if(!review) return res.status(404).send({error:'review not found',code:404});
         const product = await ProductModel.findById(review.product);
         product.rate -= review.rating;
         product.numberOfReviews--;
@@ -53,7 +53,7 @@ const deleteProductReview = async(req,res)=>{
         await review.remove();
         res.send(review);
     }catch (e){
-        res.status(400).send('Error '+e);
+        res.status(400).send({error:e.message,code:400});
     }
 }
 // update customer review
@@ -64,10 +64,10 @@ const updateProductReview = async (req,res)=>{
         const allowedUpdates = ['rating','comment','title'];
         const isValidUpdate = updates.every(update => allowedUpdates.includes(update));
 
-        if(!isValidUpdate) return res.status(400).send({error:"Invalid updates!"});
+        if(!isValidUpdate) return res.status(400).send({error:"Invalid updates",code:400});
 
         const review = await ReviewModel.findOne({customer:req.user._id, _id: req.params.id});
-        if(!review) return  res.status(404).send();
+        if(!review) return  res.status(404).send({error:'review not found',code:404});
         if(req.body.rating){
             const product = await ProductModel.findById(review.product);
             product.rate -= review.rating;
@@ -79,7 +79,7 @@ const updateProductReview = async (req,res)=>{
         res.send(review);
 
     }catch (e){
-        res.send('Error: '+e);
+        res.send({error:e.message,code:400});
     }
 }
 

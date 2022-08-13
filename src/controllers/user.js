@@ -5,12 +5,12 @@ const register = async (req, res) => {
     const user = new User(req.body);
     try {
         if (user.userType === "vendor" && !user.storeName)
-            throw new Error("the store name is required !!");
+            throw new Error("store name is required");
         user.confirmationCode = confirmationMail(user.email);
         await user.save();
         res.status(201).send();
     } catch (e) {
-        res.status(400).send(e.message);
+        res.status(400).send({error:e.message,code:400});
     }
 }
 const login = async (req, res) => {
@@ -22,18 +22,18 @@ const login = async (req, res) => {
         const token = await user.generateAuthToken();
         res.send({user, token});
     } catch (e) {
-        res.status(400).send(e.toString());
+        res.status(400).send({error:e.message,code:400});
     }
 }
 const confirm =  async (req, res) => {
     try {
         if (req.body.confirmationCode === req.user.confirmationCode)
             req.user.status = "Active";
-        else return res.status(400).send({ msg: "wrong confirmation code" });
+        else return res.status(400).send({error: "wrong confirmation code",code:400});
         await req.user.save();
         res.send(req.user);
     } catch (e) {
-        res.status(400).send(e.message);
+        res.status(400).send({error:e.message,code:400});
     }
 }
 const logout = async (req, res) => {
@@ -44,7 +44,7 @@ const logout = async (req, res) => {
         await req.user.save();
         res.send();
     } catch (e) {
-        res.status(500).send();
+        res.status(400).send({error:e.message,code:400});
     }
 }
 const userProfile = async (req, res) => {
@@ -58,13 +58,13 @@ const updateUser = async (req, res) => {
     );
 
     if (!isValidUpdate)
-        return res.status(400).send({ error: "Invalid updates!" });
+        return res.status(400).send({ error: "Invalid updates",code:400});
     try {
         updates.forEach((update) => (req.user[update] = req.body[update]));
         await req.user.save();
         res.send(req.user);
     } catch (e) {
-        res.status(400).send(e);
+        res.status(400).send({error:e.message,code:400});
     }
 }
 const deleteUser = async (req, res) => {
@@ -72,7 +72,7 @@ const deleteUser = async (req, res) => {
         await req.user.remove();
         res.send();
     } catch (e) {
-        res.status(400).send(e);
+        res.status(400).send({error:e.message,code:400});
     }
 }
 const contactUs = async (req, res) => {
@@ -80,7 +80,7 @@ const contactUs = async (req, res) => {
         await contactUsMail(req.body.email, req.body.message, req.body.name);
         res.send();
     } catch (e) {
-        res.status(400).send(e);
+        res.status(400).send({error:e.message,code:400});
     }
 }
 module.exports = {

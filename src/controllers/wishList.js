@@ -17,26 +17,27 @@ const addWishlistItem = async(req, res) => {
         await customerWishList.save();
         res.send(customerWishList);
     } catch (e) {
-        res.status(400).send("error " + e);
+        res.status(400).send({error:e.message,code:400});
     }
 }
 const getWishlistItems =  async (req, res) => {
     try {
         const customerWishList = await WishlistModel.findOne({customer:req.user._id}).populate('products.product');
-        if(! customerWishList) return res.status(404).send();
+        if(! customerWishList) return res.status(404).send({error:'products not found',code:404});
         res.send(customerWishList);
     } catch (e) {
-        res.status(400).send('error ', e);
+        res.status(400).send({error:e.message,code:400});
     }
 }
 const deleteWishlistItem = async (req, res) => {
     try {
         const customerWishList = await WishlistModel.findOne({customer:req.user._id}).populate('products.product');
+        if(!customerWishList) return res.status(404).send({error:'product not found',code:404});
         customerWishList.products = customerWishList.products.filter( wishlistProduct => wishlistProduct.product.toString() !== req.params.id);
         await customerWishList.save();
         res.send(customerWishList);
     } catch (e) {
-        res.status(400).send('error '+ e);
+        res.status(400).send({error:e.message,code:400});
     }
 }
 module.exports = {
