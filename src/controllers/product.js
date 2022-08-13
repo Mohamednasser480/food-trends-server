@@ -41,7 +41,18 @@ const getProduct = async (req,res)=>{
         res.status(400).send({error:e.message,code:400});
     }
 }
+const getCategories = async (req,res)=>{
+    try{
+        const result = await productModel.aggregate([
+            { $group: { _id: "$category", count: { $sum: 1 } } }
+        ]);
+        res.send(result);
+    }catch (e){
+        res.status(400).send({error:e.message,code:400});
+    }
+}
 module.exports = {
     getAllProducts,
-    getProduct
+    getProduct,
+    getCategories
 }
