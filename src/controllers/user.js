@@ -44,7 +44,7 @@ const logout = async (req, res) => {
         await req.user.save();
         res.send();
     } catch (e) {
-        res.status(500).send();
+        res.status(400).send();
     }
 }
 const userProfile = async (req, res) => {
