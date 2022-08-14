@@ -12,7 +12,7 @@ const createPayment = async (orderData,url)=>{
             line_items:orderData.map( item=>{
                 return {
                     price_data:{
-                        currency:'EGP' ,
+                        currency:'USD' ,
                         product_data:{name:item.product.productName},
                         unit_amount:item.product.price*100,
                     },
