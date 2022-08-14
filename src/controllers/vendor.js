@@ -39,7 +39,7 @@ const deleteProduct = async (req, res) => {
 // Update a Product
 const updateProduct = async (req, res) => {
   const images = req.files.map((file) => {
-    return file.path;
+    return `http://${HOST}:${PORT}${URI}/${file.path}`
   });
   const updates = Object.keys(req.body);
   updates.push("images");
