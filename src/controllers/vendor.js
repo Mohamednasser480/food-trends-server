@@ -1,11 +1,14 @@
 const productModel = require("../models/product");
 const orderModel = require("../models/Order");
-
+const HOST = process.env.HOST || 'localhost';
+const PORT = process.env.PORT || 5000;
+const URI = process.env.API_URI;
 // Add a Product
 const addProduct = async (req, res) => {
   try {
     const images = req.files.map((file) => {
-      return file.path;
+      return `http://${HOST}:${PORT}${URI}/${file.path}`
+      // return file.path;
     });
     const savedProduct = new productModel({
       ...req.body,
