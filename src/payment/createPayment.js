@@ -9,14 +9,14 @@ const createPayment = async (orderData,url)=>{
             cancel_url: `${url}?success=false`,
             payment_method_types : ['card'],
             mode:'payment',
-            line_items:orderData.map( item=>{
+            line_items:orderData.map( orderItem=>{
                 return {
                     price_data:{
-                        currency:'USD' ,
-                        product_data:{name:item.product.productName},
-                        unit_amount:item.product.price*100,
+                        currency:'EGP',
+                        product_data:{name:orderItem.productName},
+                        unit_amount:orderItem.price * 100,
                     },
-                    quantity: item.quantity
+                    quantity: orderItem.quantity
                 }
             })
         }
@@ -26,4 +26,5 @@ const createPayment = async (orderData,url)=>{
         return {error:e.message};
     }
 }
+
 module.exports = {createPayment}

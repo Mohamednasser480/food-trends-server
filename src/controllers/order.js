@@ -1,6 +1,6 @@
 const {createPayment} = require('../payment/createPayment');
 const orderModel = require("../models/Order");
-const cartModel = require("../models/Cart");
+const productModel =require('../models/product');
 // Get all Customer Order
 const getAllOrders = async (req, res) => {
   try{
@@ -26,19 +26,20 @@ const getAllOrders = async (req, res) => {
 // Create Order by array of product objects from cart collection
 const createOrder = async (req, res) => {
   try {
-    const customerCart = await cartModel.findOne({customer:req.user._id}).populate('products.product');
-    if(!customerCart)
+    const order = req.body.items;
+    if(!order)
       return res.status(400).send({error:'Invalid Operation checkout list should not be empty',code:400});
-    const productsOrder = customerCart.products;
-    // check the in stock Instances for each product
     let outOfStockProduct;
-    productsOrder.forEach( item=>{
-      if(!outOfStockProduct &&
-          item.product.inStock < item.quantity) outOfStockProduct = item.product.productName;
-    });
+    for(let orderItem of order){
+      const  product = await productModel.findById(orderItem.id);
+      orderItem.productName = product.productName;
+      orderItem.price = product.price;
+      if(!outOfStockProduct && product.inStock < orderItem.quantity )
+        outOfStockProduct = product.productName;
+    }
     if(outOfStockProduct)
       return res.status(400).send({error:'out of stock', productName:outOfStockProduct,code:400});
-    const makeOrderRes = await createPayment(productsOrder,req.body.url);
+    const makeOrderRes = await createPayment(order,req.body.url);
     if(makeOrderRes.error) throw new Error(makeOrderRes.error);
     res.send(makeOrderRes);
   } catch (e) {
@@ -47,10 +48,10 @@ const createOrder = async (req, res) => {
 }
 const saveOrder = async (req,res)=>{
   try {
-    const customerCart = await cartModel.findOne({customer: req.user._id}).populate('products.product');
-    const productsOrder = customerCart.products;
-    const orderObj = productsOrder.map(item => ({product: item.product._id, quantity: item.quantity}));
-    const Order = new orderModel({products: orderObj, customer: req.user._id, totalPrice: customerCart.cartPrice});
+    const orders = req.body.items;
+    const orderObj = orders.map(item => ({product: item.product, quantity: item.quantity}));
+    console.log(orderObj);
+    const Order = new orderModel({products: orderObj, customer: req.user._id, totalPrice: req.body.totalPrice});
     await Order.save();
     res.send();
   }catch(e){

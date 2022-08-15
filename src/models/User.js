@@ -114,8 +114,6 @@ userSchema.pre('save',async function(next){
         this.password = await bcrypt.hash(this.password,8) ;
     next();
 });
-
-
 userSchema.pre('remove',async function(next){
     // Delete user wishlist
     await wishlistModel.deleteOne({customer: this._id});
@@ -124,7 +122,6 @@ userSchema.pre('remove',async function(next){
     // If the User was Vendor then should delete all his products
     next();
 })
-
 const User = mongoose.model('User',userSchema)
 
 module.exports = User;
