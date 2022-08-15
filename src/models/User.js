@@ -75,6 +75,7 @@ const userSchema = new mongoose.Schema({
         type:String,
         lowercase: true
     },
+    verified:{type:String, enum: ['pending', true,false],default:'pending'},
     tokens:[{
         token:{
             type:String,
@@ -106,6 +107,8 @@ userSchema.statics.findByCredentials = async (email,password)=>{
     if(!user) throw new Error('Unable to login');
     const isMatch = await bcrypt.compare(password, user.password);
     if(!isMatch) throw new Error('Unable to login');
+    if(user.userType === 'vendor' && user.verified === 'pending') throw new Error('Pending for admin approvement');
+    if(user.userType === 'vendor' && user.verified === false) throw new Error('your account was refused');
     return user;
 }
 // Hash the plain text password before saving
