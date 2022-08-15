@@ -66,9 +66,11 @@ const updateProduct = async (req, res) => {
       return res.status(422).send({ error: "No Images Found", code: 422 });
     }
 
-    const imagesFilter = req.body["images"].filter((item) => {
-      return item !== "undefined";
-    });
+    const imagesFilter = req.body["images"]
+      ? req.body["images"].filter((item) => {
+          return item !== "undefined";
+        })
+      : [];
 
     if (imagesFilter.length + images.length > 4) {
       return res
