@@ -3,7 +3,7 @@ build/Release
 
 # Dependency directories
 node_modules/
-images/
+
 # dotenv environment variable files
 .env
 .env.development.local

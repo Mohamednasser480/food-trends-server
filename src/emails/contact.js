@@ -7,8 +7,8 @@ sgMail.setApiKey(sendgridAPIKey);
 
 const contactUsMail = (from,message,name)=>{
     sgMail.send({
-        to: 'foodtrendsfamily@gmail.com',
-        from: 'foodtrendsfamily@gmail.com',
+        to: 'foodtrendswebsite@gmail.com',
+        from: 'foodtrendswebsite@gmail.com',
         subject: `contact mail`,
         html: ` <h1> Sender: ${name} </h1><br>
                  <p>Reply: ${from}</p>
