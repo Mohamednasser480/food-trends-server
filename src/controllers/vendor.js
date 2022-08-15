@@ -1,13 +1,13 @@
 const productModel = require("../models/product");
 const orderModel = require("../models/Order");
-const HOST = process.env.HOST || 'localhost';
+const HOST = process.env.HOST || "localhost";
 const PORT = process.env.PORT || 5000;
 const URI = process.env.API_URI;
 // Add a Product
 const addProduct = async (req, res) => {
   try {
     const images = req.files.map((file) => {
-      return `http://${HOST}:${PORT}${URI}/${file.path}`
+      return `http://${HOST}:${PORT}${URI}/${file.path}`;
       // return file.path;
     });
     const savedProduct = new productModel({
@@ -39,7 +39,7 @@ const deleteProduct = async (req, res) => {
 // Update a Product
 const updateProduct = async (req, res) => {
   const images = req.files.map((file) => {
-    return `http://${HOST}:${PORT}${URI}/${file.path}`
+    return `http://${HOST}:${PORT}${URI}/${file.path}`;
   });
   const updates = Object.keys(req.body);
   updates.push("images");
@@ -65,8 +65,18 @@ const updateProduct = async (req, res) => {
     if (!images.length) {
       return res.status(422).send({ error: "No Images Found", code: 422 });
     }
+
+    const imagesFilter = req.body["images"].filter((item) => {
+      return item !== "undefined";
+    });
+
+    if (imagesFilter.length + images.length > 4) {
+      return res
+        .send(400)
+        .send({ error: "Images must be only 4 images or less" });
+    }
     // Add images to the body
-    req.body["images"] = images;
+    req.body["images"] = [...imagesFilter, ...images];
 
     const updatedProduct = await productModel.findOneAndUpdate(
       { _id: req.params.id, vendor: req.user._id },
