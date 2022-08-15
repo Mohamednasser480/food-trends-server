@@ -7,6 +7,6 @@ const deliveryController = require('../controllers/delivery');
 Router.get('/',[auth,deliveryAuth],deliveryController.getAllOrders);
 Router.post('/',[auth,deliveryAuth],deliveryController.assignOrder);
 Router.get('/me',[auth,deliveryAuth],deliveryController.getDeliveryOrders);
-Router.patch('/',[auth,deliveryAuth],deliveryController.updateOrderStatus);
+Router.put('/',[auth,deliveryAuth],deliveryController.updateOrderStatus);
 
 module.exports = Router;
