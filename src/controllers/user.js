@@ -22,7 +22,7 @@ const login = async (req, res) => {
         const token = await user.generateAuthToken();
         res.send({user, token});
     } catch (e) {
-        res.status(400).send(e.toString());
+        res.status(401).send(e.toString());
     }
 }
 const confirm =  async (req, res) => {
