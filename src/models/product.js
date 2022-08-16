@@ -29,7 +29,7 @@ const ProductSchema = new mongoose.Schema(
       required: true,
       ref: "User",
     },
-    available:{type:Boolean,default:true}
+    available:{type:Boolean,default:false}
   },
   { timestamps: true }
 );
