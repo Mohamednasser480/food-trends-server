@@ -33,7 +33,7 @@ const getProductReviews = async(req,res)=>{
             skip: req.query.skip
         }
         const count = await ReviewModel.find(filterObj).count();
-        const productReview = await ReviewModel.find(filterObj,null,options).populate('customer');
+        const productReview = await ReviewModel.find(filterObj,null,options).populate({path:'customer', match:{available: { $ne: false}}});
         if(!productReview) return res.status(404).send({error:'Review not found',code:404});
 
         res.send({data: productReview,count} );

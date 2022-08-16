@@ -76,6 +76,7 @@ const userSchema = new mongoose.Schema({
         lowercase: true
     },
     verified:{type:String, enum: ['pending', true,false],default:'pending'},
+    available:{type:Boolean,default:true},
     tokens:[{
         token:{
             type:String,
@@ -105,6 +106,7 @@ userSchema.methods.toJSON = function (){
 userSchema.statics.findByCredentials = async (email,password)=>{
     const user = await User.findOne({ email });
     if(!user) throw new Error('Unable to login');
+    if(!user.available) throw new Error('Unable to login');
     const isMatch = await bcrypt.compare(password, user.password);
     if(!isMatch) throw new Error('Unable to login');
     if(user.userType === 'vendor' && user.verified === 'pending') throw new Error('Pending for admin approvement');
@@ -117,14 +119,6 @@ userSchema.pre('save',async function(next){
         this.password = await bcrypt.hash(this.password,8) ;
     next();
 });
-userSchema.pre('remove',async function(next){
-    // Delete user wishlist
-    await wishlistModel.deleteOne({customer: this._id});
-    // Delete user cart
-    await cartModel.deleteOne({customer: this._id});
-    // If the User was Vendor then should delete all his products
-    next();
-})
 const User = mongoose.model('User',userSchema)
 
 module.exports = User;
