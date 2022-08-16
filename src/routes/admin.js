@@ -7,5 +7,5 @@ const Router = express.Router();
 Router.get('/users',[auth,adminAuth],adminController.getUsers);
 Router.put('/users/:id',[auth,adminAuth],adminController.changeStatus);
 Router.delete('/users',[auth,adminAuth],adminController.deleteUser);
-
+Router.get('/products',[auth,adminAuth],adminController.getProducts);
 module.exports = Router;
