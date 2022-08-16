@@ -133,7 +133,7 @@ const getAllOrders = async (req, res) => {
         { sort }
       )
       .populate("products.product")
-      .populate("customer");
+      .populate({path:'customer', match:{available: { $ne: false}}});
     if (!allOrders)
       return res.status(404).send({ error: "orders not found", code: 404 });
     res.send(allOrders);

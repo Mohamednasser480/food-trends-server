@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const { confirmationMail } = require("../emails/account");
 const { contactUsMail } = require("../emails/contact");
+const utils = require("./utils");
 const register = async (req, res) => {
     const user = new User(req.body);
     try {
@@ -70,9 +71,20 @@ const updateUser = async (req, res) => {
 }
 const deleteUser = async (req, res) => {
     try {
-        await req.user.remove();
+        req.user.available = false;
+        req.user.email+= `.${req.user._id}.deleted`;
+        await req.user.save();
+
+        if(req.user.userType === 'customer')
+            await utils.deleteCustomer(req.user._id);
+        else if(req.user.userType === 'vendor')
+            await utils.deleteDelivery()
+        else if(req.user.userType === 'delivery')
+            await utils.deleteDelivery();
+
         res.send();
     } catch (e) {
+        console.log(e);
         res.status(400).send({error:e.message,code:400});
     }
 }

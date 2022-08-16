@@ -1,4 +1,5 @@
 const userModel = require('../models/User');
+const utils = require('./utils');
 const getUsers = async (req,res)=>{
     try{
         const filterObj = {};
@@ -14,6 +15,8 @@ const getUsers = async (req,res)=>{
             else
                 filterObj.userType = { $in: ['vendor','delivery'] };
         }
+        if(req.query.available)
+            filterObj.available = req.query.available;
         const options = {
             limit: req.query.limit,
             skip:req.query.skip,
@@ -38,7 +41,29 @@ const changeStatus = async (req,res)=>{
         res.status(400).send({error:e.message,code:400});
     }
 }
+const deleteUser = async (req,res)=>{
+    try{
+        const user = await userModel.findById(req.body.id);
+        if(!user) return res.status(404).send({error:"user not found",code:404});
+        if(user.available) {
+            user.available = false;
+            user.email += `.${user._id}.deleted`;
+            await user.save();
+        }
+        if(user.userType === 'customer')
+            await utils.deleteCustomer(user._id);
+        else if(user.userType === 'vendor')
+            await utils.deleteDelivery()
+        else if(user.userType === 'delivery')
+            await utils.deleteDelivery();
+
+        res.send();
+    }catch (e){
+        res.status(400).send({error:e.message,code:400});
+    }
+}
 module.exports = {
     getUsers,
-    changeStatus
+    changeStatus,
+    deleteUser
 }
