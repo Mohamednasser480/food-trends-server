@@ -110,7 +110,9 @@ userSchema.statics.findByCredentials = async (email,password)=>{
     const isMatch = await bcrypt.compare(password, user.password);
     if(!isMatch) throw new Error('Unable to login');
     if(user.userType === 'vendor' && user.verified === 'pending') throw new Error('Pending for admin approvement');
-    if(user.userType === 'vendor' && user.verified === false) throw new Error('your account was refused');
+    if(user.userType === 'vendor' && user.verified === "false") throw new Error('your account was refused');
+    if(user.userType === 'delivery' && user.verified === 'pending') throw new Error('Pending for admin approvement');
+    if(user.userType === 'delivery' && user.verified === "false") throw new Error('your account was refused');
     return user;
 }
 // Hash the plain text password before saving
