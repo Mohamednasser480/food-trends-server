@@ -7,6 +7,7 @@ const register = async (req, res) => {
         if (user.userType === "vendor" && !user.storeName)
             throw new Error("the store name is required !!");
         user.confirmationCode = confirmationMail(user.email);
+        if(user.userType === 'customer') user.verified = true;
         await user.save();
         res.status(201).send();
     } catch (e) {

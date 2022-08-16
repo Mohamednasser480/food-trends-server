@@ -16,7 +16,8 @@ const getUsers = async (req,res)=>{
         }
         const options = {
             limit: req.query.limit,
-            skip:req.query.skip
+            skip:req.query.skip,
+            sort:{createdAt:-1}
         }
         const count = await userModel.find(filterObj,null).count();
         const users = await userModel.find(filterObj,null,options);
