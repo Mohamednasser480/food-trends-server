@@ -23,6 +23,7 @@ const getAllProducts = async (req,res)=>{
             req.query.search = req.query.search.toLowerCase();
             filterObj.productName = {"$regex": req.query.search,'$options':'i'};
         }
+        filterObj.available = true;
         const count = await productModel.find(filterObj,null).count();
         const products = await productModel.find(filterObj,null,options);
         if(!products) return res.status(404).send({error:'Products not found',code:404});
@@ -34,7 +35,7 @@ const getAllProducts = async (req,res)=>{
 }
 const getProduct = async (req,res)=>{
     try{
-        const product = await productModel.findOne({_id:req.params.id});
+        const product = await productModel.findOne({_id:req.params.id,available:true});
         if(!product) return res.status(404).send({error:'Product not found',code:404});
         res.status(200).send(product);
     }catch (e){
@@ -44,6 +45,7 @@ const getProduct = async (req,res)=>{
 const getCategories = async (req,res)=>{
     try{
         const result = await productModel.aggregate([
+            {$match:{available:true}},
             { $group: { _id: "$category", count: { $sum: 1 } } }
         ]);
         res.send(result);

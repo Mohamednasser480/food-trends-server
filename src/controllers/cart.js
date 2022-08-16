@@ -26,8 +26,9 @@ const addCartItem = async(req,res)=>{
         // if the product is already in the customer cart
         const productInCart = customerCart.products.find( cartItem=> cartItem.product._id.toString() === req.body.product);
         if(!productInCart){
-            if(req.quantity > product.inStock)
+            if(req.body.quantity > product.inStock)
                 return res.status(400).send({error:'Out of stock', code:400,productName:product.productName});
+            console.log()
             customerCart.products.push({product,quantity:req.body.quantity});
         }else{
             if(req.body.quantity + productInCart.quantity > product.inStock)
@@ -104,6 +105,7 @@ const putCartProducts = async(req,res)=>{
         res.status(400).send({error:e.message,code:400});
     }
 }
+
 module.exports = {
     getAllCartItems,
     updateCart,
