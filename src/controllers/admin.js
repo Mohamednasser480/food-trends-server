@@ -1,4 +1,5 @@
 const userModel = require('../models/User');
+const productModel = require('../models/product');
 const utils = require('./utils');
 const getUsers = async (req,res)=>{
     try{
@@ -62,8 +63,27 @@ const deleteUser = async (req,res)=>{
         res.status(400).send({error:e.message,code:400});
     }
 }
+const getProducts = async (req,res)=>{
+    try {
+        const options = {
+            limit: req.query.limit,
+            skip: req.query.skip
+        }
+        const filterObj = {};
+        filterObj.available = req.query.available;
+        if(req.query.search)
+        filterObj.productName = {"$regex":  req.query.search,'$options':'i'}
+        const count =  await productModel.find(filterObj).count();
+        const products = await productModel.find(filterObj, null, options);
+        if (!products) return res.status(404).send({error: 'products not found', code: 404});
+        res.send({data:products,count});
+    }catch (e){
+        res.status(400).send({error:e.message,code:400});
+    }
+}
 module.exports = {
     getUsers,
     changeStatus,
-    deleteUser
+    deleteUser,
+    getProducts
 }

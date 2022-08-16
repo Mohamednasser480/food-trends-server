@@ -25,13 +25,13 @@ const addProduct = async (req, res) => {
 // Delete a Product
 const deleteProduct = async (req, res) => {
   try {
-    const product = await productModel.findOneAndDelete({
-      _id: req.params.id,
-      vendor: req.user._id,
-    });
+    const product = await productModel.findOne({_id:req.params.id, vendor: req.user._id});
     if (!product)
       return res.status(404).send({ error: "product not found", code: 404 });
-    res.send(product);
+    product.available = false;
+    product.inStock = 0;
+    await product.save();
+    res.send();
   } catch (e) {
     res.status(400).send({ error: e.message, code: 400 });
   }
