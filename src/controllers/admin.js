@@ -58,7 +58,7 @@ const deleteUser = async (req,res)=>{
         else if(user.userType === 'vendor')
             await utils.deleteVendor(user._id);
         else if(user.userType === 'delivery')
-            await utils.deleteDelivery();
+            await utils.deleteDelivery(user._id);
 
         res.send();
     }catch (e){
@@ -88,7 +88,7 @@ const getProducts = async (req,res)=>{
 const changeProductStatus = async (req,res)=>{
     try{
         const product = await productModel.findById(req.body.id);
-        if(!product)res.status(404).send({error:'product not found',code:404});
+        if(!product) res.status(404).send({error:'product not found',code:404});
         product.available = req.body.available;
         if(!product.available) {
             product.inStock = 0;

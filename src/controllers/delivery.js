@@ -55,7 +55,6 @@ const updateOrderStatus = async(req,res)=>{
         if(!order) return res.status(404).send({error:'Order not found',code:404});
 
         order.status = req.body.status;
-
         if(req.body.status === "pending") {
             order.delivery = null;
             order.expectedDeliveryDate = null;

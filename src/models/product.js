@@ -29,7 +29,7 @@ const ProductSchema = new mongoose.Schema(
       required: true,
       ref: "User",
     },
-    available:{type:Boolean,default:false}
+    available:{ enum:[true,false,"pending"],default:"pending"}
   },
   { timestamps: true }
 );
