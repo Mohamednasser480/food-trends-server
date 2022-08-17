@@ -54,19 +54,22 @@ const saveOrder = async (req,res)=>{
     const Order = new orderModel({products: orderObj, customer: req.user._id, totalPrice: req.body.totalPrice});
     await Order.save();
     // Update in stock instances of the ordered product
-    doc.products.forEach( (productObj) =>{
+    Order.products.forEach( (productObj) =>{
         productModel.findById(productObj.product, (err,product)=>{
-            // product.inStock -= productObj.quantity;
+            product.inStock -= productObj.quantity;
             product.save();
         });
     });
     // remove ordered product from the customer cart
-    const customerCart = await cartModel.findOne({customer:doc.customer});
-    if(customerCart) {
-        customerCart.products = [];
-        customerCart.cartPrice = 0;
-        customerCart.save();
-    }
+    const customerCart = await cartModel.findOne({customer:Order.customer});
+    await customerCart.remove()
+    // // if(!!customerCart) {
+    //   console.log("Inside IF")
+    //     customerCart.products = [];
+    //     customerCart.cartPrice = 0;
+    //     await customerCart.save();
+    // // }
+    // console.log(customerCart)
     res.send();
   }catch(e){
     res.status(400).send({error:e.message,code:400});
