@@ -50,9 +50,11 @@ OrderSchema.post('save',async function(doc){
     });
     // remove ordered product from the customer cart
     const customerCart = await cartModel.findOne({customer:doc.customer});
-    customerCart.products = [];
-    customerCart.cartPrice = 0;
-    customerCart.save();
+    if(customerCart) {
+        customerCart.products = [];
+        customerCart.cartPrice = 0;
+        customerCart.save();
+    }
 });
 
 OrderSchema.pre('remove', async function(next){

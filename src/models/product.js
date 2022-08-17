@@ -14,7 +14,7 @@ const ProductSchema = new mongoose.Schema(
     weight: { type: Number },
     category: { type: String, required: true, lowercase: true },
     price: { type: Number, required: true },
-    inStock: { type: Number, required: true },
+    inStock: { type: Number, required: true ,min:0},
     discount: { type: Number },
     rate: {
       type: Number,
@@ -29,6 +29,7 @@ const ProductSchema = new mongoose.Schema(
       required: true,
       ref: "User",
     },
+    available:{ type:String,enum:["true","false","pending"],default:"pending"}
   },
   { timestamps: true }
 );

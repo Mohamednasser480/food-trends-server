@@ -12,6 +12,8 @@ const cartRoute = require('./routes/cart');
 const reviewRouter = require('./routes/review');
 const vendorRouter = require('./routes/vendor');
 const deliveryRouter = require('./routes/delivery');
+const adminRouter = require('./routes/admin');
+
 // Middlewares
 const app = express();
 app.use(cors());
@@ -45,6 +47,8 @@ app.use(`${API_URI}/vendor`, vendorRouter);
 app.use(`${API_URI}/cart`, cartRoute);
 app.use(`${API_URI}/wishlist`, wishlistRoute);
 app.use(`${API_URI}/delivery`, deliveryRouter);
+app.use(`${API_URI}/admin`, adminRouter);
+
 app.use(`${API_URI}/images`, express.static(path.join(path.resolve(__dirname, '..'), 'images')));
 
 app.listen(app.get('port'), () => {

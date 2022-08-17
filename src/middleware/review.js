@@ -13,7 +13,7 @@ const reviewAuth = async (req,res,next) =>{
         // get all customer orders
         const customerOrders = await orderModel.find({customer: req.user._id});
         // find the product in the customer orders which the order status is not pending
-        const authorized = customerOrders.some( order => order.status !=='pending'&&
+        const authorized = customerOrders.some( order => order.status ==='completed'&&
                         order.products.some(orderProduct=> orderProduct.product.toString() === req.body.product));
         if(authorized)  return next();
         else throw new Error();

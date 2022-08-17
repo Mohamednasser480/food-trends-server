@@ -3,6 +3,7 @@ const orderModel = require("../models/Order");
 const HOST = process.env.HOST || "localhost";
 const PORT = process.env.PORT || 5000;
 const URI = process.env.API_URI;
+const {deleteProductUtil} = require('./utils');
 // Add a Product
 const addProduct = async (req, res) => {
   try {
@@ -25,13 +26,14 @@ const addProduct = async (req, res) => {
 // Delete a Product
 const deleteProduct = async (req, res) => {
   try {
-    const product = await productModel.findOneAndDelete({
-      _id: req.params.id,
-      vendor: req.user._id,
-    });
+    const product = await productModel.findOne({_id:req.params.id, vendor: req.user._id});
     if (!product)
       return res.status(404).send({ error: "product not found", code: 404 });
-    res.send(product);
+    product.available = "false";
+    product.inStock = 0;
+    await product.save();
+    await deleteProductUtil(product._id);
+    res.send();
   } catch (e) {
     res.status(400).send({ error: e.message, code: 400 });
   }
@@ -66,9 +68,11 @@ const updateProduct = async (req, res) => {
       return res.status(422).send({ error: "No Images Found", code: 422 });
     }
 
-    const imagesFilter = req.body["images"].filter((item) => {
-      return item !== "undefined";
-    });
+    const imagesFilter = req.body["images"]
+      ? req.body["images"].filter((item) => {
+          return item !== "undefined";
+        })
+      : [];
 
     if (imagesFilter.length + images.length > 4) {
       return res
@@ -95,7 +99,7 @@ const updateProduct = async (req, res) => {
 // Get All Products
 const getAllProducts = async (req, res) => {
   try {
-    const products = await productModel.find({ vendor: req.params.id });
+    const products = await productModel.find({ vendor: req.params.id ,available:"true"});
     if (!products)
       res.status(404).send({ error: "product not found", code: 400 });
     res.send(products);
@@ -130,8 +134,8 @@ const getAllOrders = async (req, res) => {
         },
         { sort }
       )
-      .populate("products.product")
-      .populate("customer");
+      .populate({path:"products.product",match:{available: { $ne: "false"}}})
+      .populate({path:'customer', match:{available: { $ne: false}}});
     if (!allOrders)
       return res.status(404).send({ error: "orders not found", code: 404 });
     res.send(allOrders);
