@@ -48,7 +48,7 @@ const deleteUser = async (req,res)=>{
     try{
         const user = await userModel.findById(req.body.id);
         if(!user) return res.status(404).send({error:"user not found",code:404});
-        if(user.available) {
+        if(user.available === "true") {
             user.available = false;
             user.email += `.${user._id}.deleted`;
             await user.save();
@@ -91,7 +91,7 @@ const changeProductStatus = async (req,res)=>{
         const product = await productModel.findById(req.body.id);
         if(!product) res.status(404).send({error:'product not found',code:404});
         product.available = req.body.available;
-        if(!product.available) {
+        if(product.available==="false") {
             product.inStock = 0;
             await deleteProductUtil(product._id);
         }

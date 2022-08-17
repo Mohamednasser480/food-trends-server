@@ -29,7 +29,7 @@ const deleteProduct = async (req, res) => {
     const product = await productModel.findOne({_id:req.params.id, vendor: req.user._id});
     if (!product)
       return res.status(404).send({ error: "product not found", code: 404 });
-    product.available = false;
+    product.available = "false";
     product.inStock = 0;
     await product.save();
     await deleteProductUtil(product._id);
@@ -99,7 +99,7 @@ const updateProduct = async (req, res) => {
 // Get All Products
 const getAllProducts = async (req, res) => {
   try {
-    const products = await productModel.find({ vendor: req.params.id ,available:true});
+    const products = await productModel.find({ vendor: req.params.id ,available:"true"});
     if (!products)
       res.status(404).send({ error: "product not found", code: 400 });
     res.send(products);
@@ -134,7 +134,7 @@ const getAllOrders = async (req, res) => {
         },
         { sort }
       )
-      .populate({path:"products.product",match:{available: { $ne: false}}})
+      .populate({path:"products.product",match:{available: { $ne: "false"}}})
       .populate({path:'customer', match:{available: { $ne: false}}});
     if (!allOrders)
       return res.status(404).send({ error: "orders not found", code: 404 });
