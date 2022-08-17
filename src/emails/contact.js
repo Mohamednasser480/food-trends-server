@@ -1,18 +1,21 @@
 const dotenv = require("dotenv");
-const sgMail = require('@sendgrid/mail');
+const sgMail = require("@sendgrid/mail");
 dotenv.config();
 const sendgridAPIKey = process.env.SENDGRID_API_KEY;
 sgMail.setApiKey(sendgridAPIKey);
 
-
-const contactUsMail = (from,message,name)=>{
+const contactUsMail = (from, message, name) => {
+  try {
     sgMail.send({
-        to: 'foodtrendswebsite@gmail.com',
-        from: 'foodtrendswebsite@gmail.com',
-        subject: `contact mail`,
-        html: ` <h1> Sender: ${name} </h1><br>
+      to: "foodtrendswebsite@gmail.com",
+      from: "foodtrendswebsite@gmail.com",
+      subject: `contact mail`,
+      html: ` <h1> Sender: ${name} </h1><br>
                  <p>Reply: ${from}</p>
-                <strong>${message}</strong>`
+                <strong>${message}</strong>`,
     });
-}
-module.exports = {contactUsMail}
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+module.exports = { contactUsMail };
