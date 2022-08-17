@@ -37,7 +37,7 @@ const deleteVendor = async (vendorId)=>{
         const products = await productModel.find({vendor: vendorId});
         products.forEach(async (product) => {
             product.inStock = 0;
-            product.available = false;
+            product.available = "false";
             await product.save();
             await deleteProductUtil(product._id);
         });

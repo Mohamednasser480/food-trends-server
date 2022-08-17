@@ -42,7 +42,7 @@ const getDeliveryOrders = async(req,res)=>{
         filterObj.delivery = req.user._id;
         if(req.query.status)
             filterObj.status = req.query.status;
-        const deliveryOrders = await orderModel.find(filterObj).populate({path:'products.product',match:{available: { $ne: false}}}).populate({path:'customer', match:{available: { $ne: false}}});
+        const deliveryOrders = await orderModel.find(filterObj).populate({path:'products.product',match:{available: { $ne: "false"}}}).populate({path:'customer', match:{available: { $ne: false}}});
         if(!deliveryOrders) return res.status(404).send({message:'Orders not found',code:404});
         res.send(deliveryOrders);
     }catch (e){
