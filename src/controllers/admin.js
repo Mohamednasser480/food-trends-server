@@ -70,9 +70,11 @@ const getProducts = async (req,res)=>{
             skip: req.query.skip
         }
         const filterObj = {};
+        if(req.query.available) 
         filterObj.available = req.query.available;
         if(req.query.search)
         filterObj.productName = {"$regex":  req.query.search,'$options':'i'}
+        console.log(filterObj)
         const count =  await productModel.find(filterObj).count();
         const products = await productModel.find(filterObj, null, options);
         if (!products) return res.status(404).send({error: 'products not found', code: 404});
