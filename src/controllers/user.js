@@ -1,12 +1,14 @@
 const User = require("../models/User");
 const { confirmationMail } = require("../emails/account");
 const { contactUsMail } = require("../emails/contact");
+const utils = require("./utils");
 const register = async (req, res) => {
     const user = new User(req.body);
     try {
         if (user.userType === "vendor" && !user.storeName)
             throw new Error("the store name is required !!");
         user.confirmationCode = confirmationMail(user.email);
+        if(user.userType === 'customer') user.verified = true;
         await user.save();
         res.status(201).send();
     } catch (e) {
@@ -20,14 +22,9 @@ const login = async (req, res) => {
             req.body.password
         );
         const token = await user.generateAuthToken();
-        if (user.status === "Active") {
-            res.send({user, token});
-        }else{
-            res.send({user, token});
-            // throw new Error('Pending Account. Please Verify Your Email!!')
-        }
+        res.send({user, token});
     } catch (e) {
-        res.status(400).send(e.toString());
+        res.status(401).send(e.toString());
     }
 }
 const confirm =  async (req, res) => {
@@ -49,7 +46,7 @@ const logout = async (req, res) => {
         await req.user.save();
         res.send();
     } catch (e) {
-        res.status(500).send();
+        res.status(400).send();
     }
 }
 const userProfile = async (req, res) => {
@@ -63,21 +60,32 @@ const updateUser = async (req, res) => {
     );
 
     if (!isValidUpdate)
-        return res.status(400).send({ error: "Invalid updates!" });
+        return res.status(400).send({ error: "Invalid updates",code:400});
     try {
         updates.forEach((update) => (req.user[update] = req.body[update]));
         await req.user.save();
         res.send(req.user);
     } catch (e) {
-        res.status(400).send(e);
+        res.status(400).send({error:e.message,code:400});
     }
 }
 const deleteUser = async (req, res) => {
     try {
-        await req.user.remove();
-        res.send(req.user);
+        req.user.available = false;
+        req.user.email+= `.${req.user._id}.deleted`;
+        await req.user.save();
+
+        if(req.user.userType === 'customer')
+            await utils.deleteCustomer(req.user._id);
+        else if(req.user.userType === 'vendor')
+            await utils.deleteVendor(req.user._id)
+        else if(req.user.userType === 'delivery')
+            await utils.deleteDelivery(req.user._id);
+
+        res.send();
     } catch (e) {
-        res.status(400).send(e);
+        console.log(e);
+        res.status(400).send({error:e.message,code:400});
     }
 }
 const contactUs = async (req, res) => {
@@ -85,7 +93,7 @@ const contactUs = async (req, res) => {
         await contactUsMail(req.body.email, req.body.message, req.body.name);
         res.send();
     } catch (e) {
-        res.status(400).send(e);
+        res.status(400).send({error:e.message,code:400});
     }
 }
 module.exports = {

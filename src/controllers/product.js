@@ -23,25 +23,38 @@ const getAllProducts = async (req,res)=>{
             req.query.search = req.query.search.toLowerCase();
             filterObj.productName = {"$regex": req.query.search,'$options':'i'};
         }
+        filterObj.available = "true";
         const count = await productModel.find(filterObj,null).count();
         const products = await productModel.find(filterObj,null,options);
-        if(!products) return res.status(404).send('Products Not Found !!');
+        if(!products) return res.status(404).send({error:'Products not found',code:404});
 
         res.send({data:products,count});
-    }catch (err){
-        res.status(400).send(err);
+    }catch (e){
+        res.status(400).send({error:e.message,code:400});
     }
 }
 const getProduct = async (req,res)=>{
     try{
-        const product = await productModel.findOne({_id:req.params.id});
-        if(!product) return res.status(404).send('Product Not Found');
+        const product = await productModel.findOne({_id:req.params.id,available:"true"});
+        if(!product) return res.status(404).send({error:'Product not found',code:404});
         res.status(200).send(product);
-    }catch (err){
-        res.status(400).send(err);
+    }catch (e){
+        res.status(400).send({error:e.message,code:400});
+    }
+}
+const getCategories = async (req,res)=>{
+    try{
+        const result = await productModel.aggregate([
+            {$match:{available:"true"}},
+            { $group: { _id: "$category", count: { $sum: 1 } } }
+        ]);
+        res.send(result);
+    }catch (e){
+        res.status(400).send({error:e.message,code:400});
     }
 }
 module.exports = {
     getAllProducts,
-    getProduct
+    getProduct,
+    getCategories
 }

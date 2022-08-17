@@ -3,7 +3,8 @@ const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Product = require('./product');
-
+const wishlistModel = require('../models/Wishlist');
+const cartModel = require('../models/Cart');
 const userSchema = new mongoose.Schema({
     name:{
         type: String,
@@ -44,7 +45,8 @@ const userSchema = new mongoose.Schema({
     mobile:{
         type:String,
         required:true
-    },image:{
+    },
+    image:{
         type:String,
         default:'https://www.4read.net/uploads/authors/1534154564.png'
     },
@@ -58,13 +60,23 @@ const userSchema = new mongoose.Schema({
         unique: true
     },
     address:{
-        type:String,
-        lowercase: true
+        city:{
+            type:String,
+            required:true,
+            lowercase: true
+        },
+        governorate:{
+            type:String,
+            required:true,
+            lowercase: true
+        }
     },
     storeName:{
         type:String,
         lowercase: true
     },
+    verified:{type:String, enum: ['pending', true,false],default:'pending'},
+    available:{type:Boolean,default:true},
     tokens:[{
         token:{
             type:String,
@@ -94,9 +106,13 @@ userSchema.methods.toJSON = function (){
 userSchema.statics.findByCredentials = async (email,password)=>{
     const user = await User.findOne({ email });
     if(!user) throw new Error('Unable to login');
+    if(!user.available) throw new Error('Unable to login');
     const isMatch = await bcrypt.compare(password, user.password);
     if(!isMatch) throw new Error('Unable to login');
-    // if(user.status === 'Pending') throw new Error('Pending Account. Please Verify Your Email!!');
+    if(user.userType === 'vendor' && user.verified === 'pending') throw new Error('Pending for admin approvement');
+    if(user.userType === 'vendor' && user.verified === "false") throw new Error('your account was refused');
+    if(user.userType === 'delivery' && user.verified === 'pending') throw new Error('Pending for admin approvement');
+    if(user.userType === 'delivery' && user.verified === "false") throw new Error('your account was refused');
     return user;
 }
 // Hash the plain text password before saving
@@ -105,11 +121,6 @@ userSchema.pre('save',async function(next){
         this.password = await bcrypt.hash(this.password,8) ;
     next();
 });
-// Delete All Vendor Product
-userSchema.pre('remove',async function(next){
-    await Product.deleteMany({vendor: this._id});
-    next();
-})
 const User = mongoose.model('User',userSchema)
 
 module.exports = User;

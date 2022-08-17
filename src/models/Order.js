@@ -21,6 +21,7 @@ const OrderSchema = new mongoose.Schema({
         required:true
     },
     status:{
+        enum: ['pending', 'assigned','completed'],
         type:String,
         required:true,
         default:'pending'
@@ -30,27 +31,16 @@ const OrderSchema = new mongoose.Schema({
         ref:'User',
         required: true
     },
+    expectedDeliveryDate:{
+      type:Date,
+    },
+    delivery:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'User'
+    },
 },{ timestamps: true });
 
-OrderSchema.post('save',async function(doc){
-    // Update in stock instances of the ordered product
-    doc.products.forEach( (productObj) =>{
-        productModel.findById(productObj.product, (err,product)=>{
-            product.inStock -= productObj.quantity;
-            product.save();
-        });
-    });
-    // remove ordered product from the customer cart
-    const customerCart = await cartModel.findOne({customer:doc.customer});
-    const newCart = customerCart.products.filter( cart => {
-        const index = doc.products.findIndex( orderObj => {
-            return orderObj.product.toString() === cart.product.toString()
-        } );
-        return index === -1;
-    });
-    customerCart.products = newCart;
-    customerCart.save();
-});
+
 
 OrderSchema.pre('remove', async function(next){
     this.products.forEach( (productObj) =>{

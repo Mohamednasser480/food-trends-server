@@ -1,9 +1,9 @@
-const vendorAuth = async (req,res,next) =>{
+const adminAuth = async (req,res,next) =>{
     try {
-        if(req.user.userType === 'vendor') next();
+        if(req.user.userType === 'admin') next();
         else throw new Error();
     }catch (e){
         res.status(401).send({error:'authentication error!',code:401});
     }
 }
-module.exports = vendorAuth;
+module.exports = adminAuth;
