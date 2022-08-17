@@ -3,7 +3,7 @@ const orderModel = require("../models/Order");
 const HOST = process.env.HOST || "localhost";
 const PORT = process.env.PORT || 5000;
 const URI = process.env.API_URI;
-const { deleteProductUtil } = require("./utils");
+const {deleteProductUtil} = require('./utils');
 // Add a Product
 const addProduct = async (req, res) => {
   try {
@@ -26,10 +26,7 @@ const addProduct = async (req, res) => {
 // Delete a Product
 const deleteProduct = async (req, res) => {
   try {
-    const product = await productModel.findOne({
-      _id: req.params.id,
-      vendor: req.user._id,
-    });
+    const product = await productModel.findOne({_id:req.params.id, vendor: req.user._id});
     if (!product)
       return res.status(404).send({ error: "product not found", code: 404 });
     product.available = "false";
@@ -67,17 +64,15 @@ const updateProduct = async (req, res) => {
   if (!isValidUpdate)
     return res.status(400).send({ error: "Invalid updates", code: 400 });
   try {
-    // if (!images.length) {
-    //   return res.status(422).send({ error: "No Images Found", code: 422 });
-    // }
+    if (!images.length) {
+      return res.status(422).send({ error: "No Images Found", code: 422 });
+    }
 
     const imagesFilter = req.body["images"]
       ? req.body["images"].filter((item) => {
           return item !== "undefined";
         })
       : [];
-
-    console.log(imagesFilter);
 
     if (imagesFilter.length + images.length > 4) {
       return res
@@ -139,11 +134,8 @@ const getAllOrders = async (req, res) => {
         },
         { sort }
       )
-      .populate({
-        path: "products.product",
-        match: { available: { $ne: "false" } },
-      })
-      .populate({ path: "customer", match: { available: { $ne: false } } });
+      .populate({path:"products.product",match:{available: { $ne: "false"}}})
+      .populate({path:'customer', match:{available: { $ne: false}}});
     if (!allOrders)
       return res.status(404).send({ error: "orders not found", code: 404 });
     res.send(allOrders);
