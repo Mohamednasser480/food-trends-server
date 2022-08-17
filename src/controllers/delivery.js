@@ -28,7 +28,7 @@ const assignOrder = async (req,res)=>{
 
         const dt = new Date();
         dt.setDate(dt.getDate() + 1)
-        order.expectedDeliveryDate = `${dt.getFullYear()}-${dt.getMonth()+1}-${dt.getDate()}`;
+        order.expectedDeliveryDate = dt.toLocaleDateString();
 
         await order.save();
         res.send(order);
