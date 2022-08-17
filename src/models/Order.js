@@ -32,7 +32,7 @@ const OrderSchema = new mongoose.Schema({
         required: true
     },
     expectedDeliveryDate:{
-      type:String,
+      type:Date,
     },
     delivery:{
         type:mongoose.Schema.Types.ObjectId,
@@ -40,22 +40,7 @@ const OrderSchema = new mongoose.Schema({
     },
 },{ timestamps: true });
 
-OrderSchema.post('save',async function(doc){
-    // // Update in stock instances of the ordered product
-    // doc.products.forEach( (productObj) =>{
-    //     productModel.findById(productObj.product, (err,product)=>{
-    //         // product.inStock -= productObj.quantity;
-    //         product.save();
-    //     });
-    // });
-    // remove ordered product from the customer cart
-    // const customerCart = await cartModel.findOne({customer:doc.customer});
-    // if(customerCart) {
-    //     customerCart.products = [];
-    //     customerCart.cartPrice = 0;
-    //     customerCart.save();
-    // }
-});
+
 
 OrderSchema.pre('remove', async function(next){
     this.products.forEach( (productObj) =>{
