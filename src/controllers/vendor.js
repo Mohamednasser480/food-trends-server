@@ -99,7 +99,7 @@ const updateProduct = async (req, res) => {
 // Get All Products
 const getAllProducts = async (req, res) => {
   try {
-    const products = await productModel.find({ vendor: req.params.id ,available:"true"});
+    const products = await productModel.find({ vendor: req.params.id });
     if (!products)
       res.status(404).send({ error: "product not found", code: 400 });
     res.send(products);
