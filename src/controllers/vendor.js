@@ -130,6 +130,7 @@ const getAllOrders = async (req, res) => {
           status: 1,
           customer: 1,
           createdAt: 1,
+          expectedDeliveryDate:1,
         },
         { sort }
       )
