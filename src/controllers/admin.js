@@ -69,7 +69,8 @@ const getProducts = async (req,res)=>{
     try {
         const options = {
             limit: req.query.limit,
-            skip: req.query.skip
+            skip: req.query.skip,
+            sort:{createdAt:-1}
         }
         const filterObj = {};
         if(req.query.available) 
