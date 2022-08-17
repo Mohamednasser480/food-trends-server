@@ -78,9 +78,9 @@ const deleteUser = async (req, res) => {
         if(req.user.userType === 'customer')
             await utils.deleteCustomer(req.user._id);
         else if(req.user.userType === 'vendor')
-            await utils.deleteDelivery()
+            await utils.deleteVendor(req.user._id)
         else if(req.user.userType === 'delivery')
-            await utils.deleteDelivery();
+            await utils.deleteDelivery(req.user._id);
 
         res.send();
     } catch (e) {
