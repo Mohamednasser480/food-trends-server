@@ -1,5 +1,6 @@
 const cartModel = require("../models/Cart");
 const wishlistModel = require("../models/Wishlist");
+const productModel = require("../models/product");
 // delete Customer cart
 // delete Customer wishlist
 const deleteCustomer = async (customerId)=>{
@@ -24,8 +25,14 @@ const deleteProductUtil = async (productId)=>{
         await wishlist.save();
     }
 }
-const deleteVendor = async (req,res)=>{
-
+const deleteVendor = async (vendorId)=>{
+    const products = await productModel.find({vendor:vendorId});
+    products.forEach(async (product) => {
+        product.inStock = 0;
+        product.available = false;
+        await product.save();
+        await deleteProductUtil(product._id);
+    });
 }
 const deleteDelivery = async (req,res)=>{
 
@@ -34,8 +41,5 @@ module.exports ={
     deleteCustomer,
     deleteVendor,
     deleteDelivery,
-    deleteProductUtil
+    deleteProductUtil,
 }
-
-// cart1   9.85 * 2
-// cart2    5 * 9.85 + 10 * 12.84

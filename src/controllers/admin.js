@@ -1,6 +1,8 @@
 const userModel = require('../models/User');
 const productModel = require('../models/product');
 const utils = require('./utils');
+const {deleteProductUtil} = require("./utils");
+
 const getUsers = async (req,res)=>{
     try{
         const filterObj = {};
@@ -31,7 +33,7 @@ const getUsers = async (req,res)=>{
         res.send({error:e.message,code:400});
     }
 }
-const changeStatus = async (req,res)=>{
+const changeUserStatus = async (req,res)=>{
     try{
         const user = await userModel.findById(req.params.id);
         if(!user)res.status(404).send({error:'user not found',code:404});
@@ -54,7 +56,7 @@ const deleteUser = async (req,res)=>{
         if(user.userType === 'customer')
             await utils.deleteCustomer(user._id);
         else if(user.userType === 'vendor')
-            await utils.deleteDelivery()
+            await utils.deleteVendor(user._id);
         else if(user.userType === 'delivery')
             await utils.deleteDelivery();
 
@@ -76,16 +78,33 @@ const getProducts = async (req,res)=>{
         filterObj.productName = {"$regex":  req.query.search,'$options':'i'}
         console.log(filterObj)
         const count =  await productModel.find(filterObj).count();
-        const products = await productModel.find(filterObj, null, options);
+        const products = await productModel.find(filterObj, null, options).populate('vendor');
         if (!products) return res.status(404).send({error: 'products not found', code: 404});
         res.send({data:products,count});
     }catch (e){
         res.status(400).send({error:e.message,code:400});
     }
 }
+const changeProductStatus = async (req,res)=>{
+    try{
+        const product = await productModel.findById(req.body.id);
+        if(!product)res.status(404).send({error:'product not found',code:404});
+        product.available = req.body.available;
+        if(!product.available) {
+            product.inStock = 0;
+            await deleteProductUtil(product._id);
+        }
+        await product.save();
+        res.send(product);
+    }catch (e){
+        res.status(400).send({error:e.message,code:400});
+    }
+}
+
 module.exports = {
     getUsers,
-    changeStatus,
+    changeUserStatus,
     deleteUser,
-    getProducts
+    getProducts,
+    changeProductStatus
 }
