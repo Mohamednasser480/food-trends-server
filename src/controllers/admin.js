@@ -48,7 +48,7 @@ const deleteUser = async (req,res)=>{
     try{
         const user = await userModel.findById(req.body.id);
         if(!user) return res.status(404).send({error:"user not found",code:404});
-        if(user.available === "true") {
+        if(user.available === true) {
             user.available = false;
             user.email += `.${user._id}.deleted`;
             await user.save();
