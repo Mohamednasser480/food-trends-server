@@ -3,21 +3,19 @@ const path = require("path");
 const DatauriParser = require("datauri/parser");
 const productModel = require("../models/product");
 const orderModel = require("../models/Order");
-const HOST = process.env.HOST || "localhost";
-const PORT = process.env.PORT || 5000;
-const URI = process.env.API_URI;
 const { deleteProductUtil } = require("./utils");
 // Add a Product
 const addProduct = async (req, res) => {
   try {
     const parser = new DatauriParser();
 
-    function fileto64(file) {
+    const fileto64 = (file) => {
       return parser.format(
         path.extname(file.originalname).toString(),
         file.buffer
       );
-    }
+    };
+
     let imagesURL = [];
 
     for (let file of req.files) {
