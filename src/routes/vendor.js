@@ -30,17 +30,4 @@ Router.patch(
   productController.updateProduct
 );
 
-Router.post("/cloud", async (req, res) => {
-  try {
-    const fileStr = req.body.data;
-    const uploadResponse = await cloudinary.uploader.upload(fileStr, {
-      upload_preset: "ml_default",
-    });
-    console.log(uploadResponse);
-    res.status(200).send("Done");
-  } catch (e) {
-    res.status(500).send({ error: e.message, code: 400 });
-  }
-});
-
 module.exports = Router;
