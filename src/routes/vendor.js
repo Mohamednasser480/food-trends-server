@@ -1,4 +1,3 @@
-
 const express = require("express");
 const auth = require("../middleware/auth");
 const vendorAuth = require("../middleware/vendorRole");
@@ -8,7 +7,7 @@ const multer = require("multer");
 
 const fileStorage = multer.memoryStorage();
 
-const multerUploads = multer({ fileStorage }).single("images");
+const multerUploads = multer({ fileStorage }).array("images", 4);
 
 // get all vendor orders
 Router.get("/orders/", [auth, vendorAuth], productController.getAllOrders);
@@ -34,9 +33,9 @@ Router.patch(
 Router.post("/cloud", async (req, res) => {
   try {
     const fileStr = req.body.data;
-const uploadResponse = await cloudinary.uploader.upload(fileStr, {
-  upload_preset: "ml_default",
-});
+    const uploadResponse = await cloudinary.uploader.upload(fileStr, {
+      upload_preset: "ml_default",
+    });
     console.log(uploadResponse);
     res.status(200).send("Done");
   } catch (e) {
