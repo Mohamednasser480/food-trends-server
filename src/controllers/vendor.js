@@ -18,24 +18,24 @@ const addProduct = async (req, res) => {
         file.buffer
       );
     }
-    const file64 = fileto64(req.file).content;
+    let imagesURL = [];
 
-    const uploadResponse = await cloudinary.uploader.upload(file64, {
-      upload_preset: "ml_default",
-    });
-    const imageURL=uploadResponse.url
+    for (let file of req.files) {
+      const file64 = fileto64(file).content;
 
+      const uploadResponse = await cloudinary.uploader.upload(file64, {
+        upload_preset: "ml_default",
+      });
+      imagesURL.push(uploadResponse.url);
+    }
 
-    const images=[imageURL]
     const savedProduct = new productModel({
       ...req.body,
-      images,
+      images: imagesURL,
       vendor: req.user._id,
     });
     await savedProduct.save();
     res.status(201).send(savedProduct);
-
-  
   } catch (e) {
     res.status(400).send({ error: e.message, code: 400 });
   }
@@ -61,7 +61,6 @@ const deleteProduct = async (req, res) => {
 };
 // Update a Product
 const updateProduct = async (req, res) => {
-
   const parser = new DatauriParser();
 
   function fileto64(file) {
@@ -70,18 +69,18 @@ const updateProduct = async (req, res) => {
       file.buffer
     );
   }
-  const file64 = fileto64(req.file).content;
 
-  const uploadResponse = await cloudinary.uploader.upload(file64, {
-    upload_preset: "ml_default",
-  });
-  const imageURL=uploadResponse.url
+  let imagesURL = [];
 
+  for (let file of req.files) {
+    const file64 = fileto64(file).content;
 
-  const images=[imageURL]
+    const uploadResponse = await cloudinary.uploader.upload(file64, {
+      upload_preset: "ml_default",
+    });
+    imagesURL.push(uploadResponse.url);
+  }
 
-
-  
   const updates = Object.keys(req.body);
   updates.push("images");
   const allowedUpdates = [
@@ -103,20 +102,19 @@ const updateProduct = async (req, res) => {
   if (!isValidUpdate)
     return res.status(400).send({ error: "Invalid updates", code: 400 });
   try {
-  //   const imagesFilter = req.body["images"]
-  //     ? req.body["images"].filter((item) => {
-  //         return item !== "undefined";
-  //       })
-  //     : [];
+    const imagesFilter = req.body["images"]
+      ? req.body["images"].filter((item) => {
+          return item !== "undefined";
+        })
+      : [];
 
-  //   if (imagesFilter.length + images.length > 4) {
-  //     return res
-  //       .send(400)
-  //       .send({ error: "Images must be only 4 images or less" });
-  //   }
-  //   // Add images to the body
-  //   req.body["images"] = [...imagesFilter, ...images];
-    req.body["images"] = images;
+    if (imagesFilter.length + imagesURL.length > 4) {
+      return res
+        .send(400)
+        .send({ error: "Images must be only 4 images or less" });
+    }
+    // Add images to the body
+    req.body["images"] = [...imagesFilter, ...imagesURL];
 
     const updatedProduct = await productModel.findOneAndUpdate(
       { _id: req.params.id, vendor: req.user._id },
